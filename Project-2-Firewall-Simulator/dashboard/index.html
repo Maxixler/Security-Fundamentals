@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireWall - Firewall Simulator Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon fire">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <span class="logo-text">FireWall</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-page="dashboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard</a></li>
+            <li><a href="#" class="nav-link" data-page="rules">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Rules</a></li>
+            <li><a href="#" class="nav-link" data-page="zones">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Zones</a></li>
+            <li><a href="#" class="nav-link" data-page="traffic">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Traffic Sim</a></li>
+            <li><a href="#" class="nav-link" data-page="logs">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                Logs</a></li>
+            <li><a href="#" class="nav-link" data-page="connections">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                Connections</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="fw-status">
+                <div class="status-dot active"></div>
+                <span>Firewall Active</span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h1>Firewall Dashboard</h1>
+                <p class="page-subtitle">Real-time firewall monitoring and statistics</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon st-total"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="stat-content"><span class="stat-value" id="st-total">0</span><span class="stat-label">Total Packets</span></div></div>
+                <div class="stat-card"><div class="stat-icon st-allow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="stat-content"><span class="stat-value" id="st-allow">0</span><span class="stat-label">Allowed</span></div></div>
+                <div class="stat-card"><div class="stat-icon st-deny"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div class="stat-content"><span class="stat-value" id="st-deny">0</span><span class="stat-label">Denied</span></div></div>
+                <div class="stat-card"><div class="stat-icon st-drop"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-content"><span class="stat-value" id="st-drop">0</span><span class="stat-label">Dropped</span></div></div>
+            </div>
+            <!-- Quick simulate -->
+            <div class="card-row">
+                <div class="card flex-1">
+                    <h2 class="card-title">Quick Traffic Simulation</h2>
+                    <p class="card-desc">Generate test traffic to see the firewall in action</p>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="simulate('normal',100)">Normal (100)</button>
+                        <button class="btn btn-danger" onclick="simulate('port_scan',50)">Port Scan</button>
+                        <button class="btn btn-danger" onclick="simulate('brute_force',30)">Brute Force</button>
+                        <button class="btn btn-danger" onclick="simulate('ot_intrusion',20)">OT Intrusion</button>
+                        <button class="btn btn-secondary" onclick="simulate('handshake')">TCP Handshake</button>
+                    </div>
+                </div>
+                <div class="card flex-1">
+                    <h2 class="card-title">Continuous Stream</h2>
+                    <p class="card-desc">Start/stop a continuous mixed traffic stream</p>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="btn-stream-start" onclick="toggleStream('start')">Start Stream</button>
+                        <button class="btn btn-secondary" id="btn-stream-stop" onclick="toggleStream('stop')">Stop Stream</button>
+                    </div>
+                    <div class="stream-status" id="stream-status">Stream: Stopped</div>
+                </div>
+            </div>
+            <!-- Recent activity -->
+            <div class="card">
+                <h2 class="card-title">Recent Decisions</h2>
+                <div class="table-container" style="max-height:350px;overflow-y:auto;">
+                    <table class="data-table" id="recent-table">
+                        <thead><tr><th>Time</th><th>Action</th><th>Proto</th><th>Source</th><th>Destination</th><th>Zones</th><th>Reason</th></tr></thead>
+                        <tbody id="recent-tbody"><tr><td colspan="7" class="empty-cell">Run a simulation to see results</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RULES PAGE -->
+        <div class="page" id="page-rules">
+            <div class="page-header"><h1>Firewall Rules</h1><p class="page-subtitle">Manage packet filtering rules (first match wins)</p></div>
+            <div class="card">
+                <div class="card-header-row"><h2 class="card-title">Rule Set</h2><button class="btn btn-primary btn-small" onclick="showAddRuleForm()">+ Add Rule</button></div>
+                <div class="table-container">
+                    <table class="data-table" id="rules-table">
+                        <thead><tr><th>#</th><th>Pri</th><th>Name</th><th>Action</th><th>Proto</th><th>Source</th><th>Destination</th><th>Dir</th><th>Hits</th><th>Status</th></tr></thead>
+                        <tbody id="rules-tbody"><tr><td colspan="10" class="empty-cell">Loading rules...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Add rule form (hidden) -->
+            <div class="card" id="add-rule-form" style="display:none;">
+                <h2 class="card-title">Add New Rule</h2>
+                <div class="form-grid">
+                    <div class="input-group"><label>Name</label><input type="text" id="r-name" class="input" placeholder="Rule name"></div>
+                    <div class="input-group"><label>Priority</label><input type="number" id="r-priority" class="input" value="500"></div>
+                    <div class="input-group"><label>Action</label><select id="r-action" class="input"><option value="ALLOW">ALLOW</option><option value="DENY">DENY</option><option value="DROP">DROP</option><option value="LOG">LOG</option></select></div>
+                    <div class="input-group"><label>Protocol</label><select id="r-protocol" class="input"><option value="ANY">ANY</option><option value="TCP">TCP</option><option value="UDP">UDP</option><option value="ICMP">ICMP</option></select></div>
+                    <div class="input-group"><label>Source IP</label><input type="text" id="r-src-ip" class="input" value="any" placeholder="IP or CIDR"></div>
+                    <div class="input-group"><label>Src Port</label><input type="number" id="r-src-port" class="input" value="0" placeholder="0=any"></div>
+                    <div class="input-group"><label>Dest IP</label><input type="text" id="r-dst-ip" class="input" value="any" placeholder="IP or CIDR"></div>
+                    <div class="input-group"><label>Dst Port</label><input type="number" id="r-dst-port" class="input" value="0" placeholder="0=any"></div>
+                    <div class="input-group"><label>Direction</label><select id="r-direction" class="input"><option value="ANY">ANY</option><option value="INBOUND">INBOUND</option><option value="OUTBOUND">OUTBOUND</option><option value="FORWARD">FORWARD</option></select></div>
+                    <div class="input-group"><label>Description</label><input type="text" id="r-desc" class="input" placeholder="Rule description"></div>
+                </div>
+                <div class="btn-group"><button class="btn btn-primary" onclick="addRule()">Save Rule</button><button class="btn btn-secondary" onclick="hideAddRuleForm()">Cancel</button></div>
+            </div>
+        </div>
+
+        <!-- ZONES PAGE -->
+        <div class="page" id="page-zones">
+            <div class="page-header"><h1>Security Zones</h1><p class="page-subtitle">Network segmentation and inter-zone policies</p></div>
+            <div class="card">
+                <h2 class="card-title">Zone Overview</h2>
+                <div class="zones-grid" id="zones-grid"></div>
+            </div>
+            <div class="card">
+                <h2 class="card-title">Inter-Zone Policy Matrix</h2>
+                <p class="card-desc">Shows default policy for traffic flowing between zones</p>
+                <div class="table-container" id="zone-matrix-container"></div>
+            </div>
+        </div>
+
+        <!-- TRAFFIC SIM PAGE -->
+        <div class="page" id="page-traffic">
+            <div class="page-header"><h1>Traffic Simulator</h1><p class="page-subtitle">Test individual packets against the firewall</p></div>
+            <div class="card">
+                <h2 class="card-title">Test a Packet</h2>
+                <p class="card-desc">Craft a custom packet and see how the firewall processes it</p>
+                <div class="form-grid">
+                    <div class="input-group"><label>Source IP</label><input type="text" id="t-src-ip" class="input" value="192.168.1.10"></div>
+                    <div class="input-group"><label>Src Port</label><input type="number" id="t-src-port" class="input" value="54321"></div>
+                    <div class="input-group"><label>Dest IP</label><input type="text" id="t-dst-ip" class="input" value="8.8.8.8"></div>
+                    <div class="input-group"><label>Dst Port</label><input type="number" id="t-dst-port" class="input" value="443"></div>
+                    <div class="input-group"><label>Protocol</label><select id="t-proto" class="input"><option value="TCP">TCP</option><option value="UDP">UDP</option><option value="ICMP">ICMP</option></select></div>
+                    <div class="input-group"><label>Direction</label><select id="t-dir" class="input"><option value="OUTBOUND">OUTBOUND</option><option value="INBOUND">INBOUND</option><option value="FORWARD">FORWARD</option></select></div>
+                    <div class="input-group"><label>TCP Flags</label><input type="text" id="t-flags" class="input" value="SYN" placeholder="SYN,ACK,FIN..."></div>
+                </div>
+                <button class="btn btn-primary" onclick="testPacket()">Test Packet</button>
+            </div>
+            <div class="card" id="test-result-card" style="display:none;">
+                <h2 class="card-title">Result</h2>
+                <div id="test-result"></div>
+            </div>
+            <!-- Preset scenarios -->
+            <div class="card">
+                <h2 class="card-title">Quick Test Scenarios</h2>
+                <div class="scenario-grid">
+                    <button class="scenario-btn allow" onclick="testScenario('web')">Internal -> Web (HTTPS)</button>
+                    <button class="scenario-btn allow" onclick="testScenario('dns')">Internal -> DNS</button>
+                    <button class="scenario-btn deny" onclick="testScenario('telnet')">Any -> Telnet</button>
+                    <button class="scenario-btn deny" onclick="testScenario('ot_modbus')">IT -> OT Modbus</button>
+                    <button class="scenario-btn allow" onclick="testScenario('ot_internal')">OT -> OT Modbus</button>
+                    <button class="scenario-btn deny" onclick="testScenario('ot_internet')">OT -> Internet</button>
+                    <button class="scenario-btn allow" onclick="testScenario('ssh_admin')">Admin -> SSH</button>
+                    <button class="scenario-btn deny" onclick="testScenario('ssh_external')">External -> SSH</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS PAGE -->
+        <div class="page" id="page-logs">
+            <div class="page-header"><h1>Firewall Logs</h1><p class="page-subtitle">Packet processing history</p></div>
+            <div class="card">
+                <div class="card-header-row"><h2 class="card-title">Log Entries</h2><button class="btn btn-secondary btn-small" onclick="loadLogs()">Refresh</button></div>
+                <div class="table-container" style="max-height:500px;overflow-y:auto;">
+                    <table class="data-table" id="logs-table">
+                        <thead><tr><th>Time</th><th>Action</th><th>Proto</th><th>Source</th><th>Destination</th><th>State</th><th>Rule</th><th>Reason</th></tr></thead>
+                        <tbody id="logs-tbody"><tr><td colspan="8" class="empty-cell">No logs yet</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTIONS PAGE -->
+        <div class="page" id="page-connections">
+            <div class="page-header"><h1>Connection Table</h1><p class="page-subtitle">Stateful connection tracking</p></div>
+            <div class="stats-grid" id="conn-stats"></div>
+            <div class="card">
+                <div class="card-header-row"><h2 class="card-title">Active Connections</h2><button class="btn btn-secondary btn-small" onclick="loadConnections()">Refresh</button></div>
+                <div class="table-container" style="max-height:500px;overflow-y:auto;">
+                    <table class="data-table">
+                        <thead><tr><th>Source</th><th>Destination</th><th>Proto</th><th>State</th><th>Pkts In</th><th>Pkts Out</th><th>Age</th></tr></thead>
+                        <tbody id="conn-tbody"><tr><td colspan="7" class="empty-cell">No connections tracked</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="toast-container"></div>
+    <script src="app.js"></script>
+</body>
+</html>

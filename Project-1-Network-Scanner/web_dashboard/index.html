@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetScan - Network Scanner Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                    </svg>
+                </div>
+                <span class="logo-text">NetScan</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-page="dashboard" id="nav-dashboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a></li>
+            <li><a href="#" class="nav-link" data-page="scanner" id="nav-scanner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Scanner
+            </a></li>
+            <li><a href="#" class="nav-link" data-page="results" id="nav-results">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Results
+            </a></li>
+            <li><a href="#" class="nav-link" data-page="subnet" id="nav-subnet">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                Subnet Calc
+            </a></li>
+            <li><a href="#" class="nav-link" data-page="learn" id="nav-learn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Learn
+            </a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="system-info" id="system-info">
+                <div class="info-item">
+                    <span class="info-label">Your IP</span>
+                    <span class="info-value" id="local-ip">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Subnet</span>
+                    <span class="info-value" id="local-subnet">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        
+        <!-- DASHBOARD PAGE -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <p class="page-subtitle">Network Security Overview</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" id="stat-hosts">
+                    <div class="stat-icon hosts-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="total-hosts">0</span>
+                        <span class="stat-label">Discovered Hosts</span>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-ports">
+                    <div class="stat-icon ports-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="total-open-ports">0</span>
+                        <span class="stat-label">Open Ports Found</span>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-services">
+                    <div class="stat-icon services-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="total-services">0</span>
+                        <span class="stat-label">Services Detected</span>
+                    </div>
+                </div>
+                <div class="stat-card warning" id="stat-warnings">
+                    <div class="stat-icon warnings-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="total-warnings">0</span>
+                        <span class="stat-label">Security Warnings</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Scan -->
+            <div class="card">
+                <h2 class="card-title">⚡ Quick Scan</h2>
+                <p class="card-desc">Rapidly discover hosts and scan common ports on your network</p>
+                <div class="quick-scan-form">
+                    <div class="input-group">
+                        <label>Target</label>
+                        <input type="text" id="quick-target" placeholder="e.g., 192.168.1.0/24 or 192.168.1.1" class="input">
+                    </div>
+                    <button class="btn btn-primary" id="btn-quick-scan" onclick="quickScan()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Start Scan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <h2 class="card-title">📋 Recent Scan Results</h2>
+                <div id="recent-results" class="results-placeholder">
+                    <div class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <p>No scans yet. Start your first scan above!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCANNER PAGE -->
+        <div class="page" id="page-scanner">
+            <div class="page-header">
+                <h1>Network Scanner</h1>
+                <p class="page-subtitle">Configure and run detailed network scans</p>
+            </div>
+
+            <div class="scan-panels">
+                <!-- Host Discovery Panel -->
+                <div class="card">
+                    <h2 class="card-title">🔍 Host Discovery</h2>
+                    <p class="card-desc">Find active devices on your network using TCP or ICMP probes</p>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Target Network</label>
+                            <input type="text" id="discover-target" placeholder="192.168.1.0/24" class="input">
+                        </div>
+                        <div class="input-group">
+                            <label>Method</label>
+                            <select id="discover-method" class="input">
+                                <option value="tcp">TCP Ping (Recommended)</option>
+                                <option value="icmp">ICMP Ping</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Timeout (seconds)</label>
+                            <input type="number" id="discover-timeout" value="1.0" min="0.1" max="10" step="0.1" class="input">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-discover" onclick="discoverHosts()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Discover Hosts
+                    </button>
+                </div>
+
+                <!-- Port Scanner Panel -->
+                <div class="card">
+                    <h2 class="card-title">📡 Port Scanner</h2>
+                    <p class="card-desc">Scan open ports and detect services on target hosts</p>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Target IP</label>
+                            <input type="text" id="scan-target" placeholder="192.168.1.1" class="input">
+                        </div>
+                        <div class="input-group">
+                            <label>Scan Profile</label>
+                            <select id="scan-profile" class="input">
+                                <option value="common">Common Ports (~36 ports)</option>
+                                <option value="quick">Quick (Ports 1-1024)</option>
+                                <option value="top100">Top 100 Ports</option>
+                                <option value="full">Full Scan (All 65535)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Timeout (seconds)</label>
+                            <input type="number" id="scan-timeout" value="1.0" min="0.1" max="10" step="0.1" class="input">
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="btn-scan" onclick="scanPorts()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Scan Ports
+                        </button>
+                        <button class="btn btn-secondary" id="btn-full-scan" onclick="fullScan()">
+                            🔄 Full Network Scan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Progress -->
+            <div class="card" id="scan-progress-card" style="display:none;">
+                <h2 class="card-title">⏳ Scan in Progress</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="scan-progress"></div>
+                    </div>
+                    <p class="progress-text" id="progress-text">Initializing scan...</p>
+                </div>
+                <div class="scan-log" id="scan-log"></div>
+            </div>
+        </div>
+
+        <!-- RESULTS PAGE -->
+        <div class="page" id="page-results">
+            <div class="page-header">
+                <h1>Scan Results</h1>
+                <p class="page-subtitle">Detailed view of discovered hosts, ports, and services</p>
+            </div>
+
+            <!-- Hosts Table -->
+            <div class="card" id="hosts-card">
+                <h2 class="card-title">🖥️ Discovered Hosts</h2>
+                <div class="table-container">
+                    <table class="data-table" id="hosts-table">
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th>Method</th>
+                                <th>RTT</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hosts-tbody">
+                            <tr><td colspan="5" class="empty-cell">No hosts discovered yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ports Table -->
+            <div class="card" id="ports-card">
+                <h2 class="card-title">📡 Open Ports</h2>
+                <div class="table-container">
+                    <table class="data-table" id="ports-table">
+                        <thead>
+                            <tr>
+                                <th>Port</th>
+                                <th>State</th>
+                                <th>Service</th>
+                                <th>Description</th>
+                                <th>RTT</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ports-tbody">
+                            <tr><td colspan="6" class="empty-cell">No ports scanned yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Services Table -->
+            <div class="card" id="services-card">
+                <h2 class="card-title">🔧 Service Details</h2>
+                <div class="table-container">
+                    <table class="data-table" id="services-table">
+                        <thead>
+                            <tr>
+                                <th>Port</th>
+                                <th>Service</th>
+                                <th>Version</th>
+                                <th>Banner</th>
+                                <th>SSL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-tbody">
+                            <tr><td colspan="5" class="empty-cell">Run a scan with service detection</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Security Warnings -->
+            <div class="card" id="warnings-card" style="display:none;">
+                <h2 class="card-title">⚠️ Security Warnings</h2>
+                <div id="warnings-list"></div>
+            </div>
+        </div>
+
+        <!-- SUBNET CALCULATOR PAGE -->
+        <div class="page" id="page-subnet">
+            <div class="page-header">
+                <h1>Subnet Calculator</h1>
+                <p class="page-subtitle">Learn about IP addressing and subnetting</p>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">🧮 Calculate Subnet</h2>
+                <div class="subnet-form">
+                    <div class="input-group" style="flex:1;">
+                        <label>CIDR Notation</label>
+                        <input type="text" id="subnet-input" placeholder="e.g., 192.168.1.0/24" class="input">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateSubnet()">Calculate</button>
+                </div>
+            </div>
+
+            <div class="card" id="subnet-result" style="display:none;">
+                <h2 class="card-title">📊 Subnet Information</h2>
+                <div class="subnet-grid" id="subnet-grid"></div>
+            </div>
+
+            <!-- Common Subnets Reference -->
+            <div class="card">
+                <h2 class="card-title">📖 Common Subnet Masks Reference</h2>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>CIDR</th><th>Subnet Mask</th><th>Usable Hosts</th><th>Typical Use</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>/8</td><td>255.0.0.0</td><td>16,777,214</td><td>Class A - Large enterprises</td></tr>
+                            <tr><td>/16</td><td>255.255.0.0</td><td>65,534</td><td>Class B - Medium networks</td></tr>
+                            <tr><td>/24</td><td>255.255.255.0</td><td>254</td><td>Class C - Small networks, most common</td></tr>
+                            <tr><td>/25</td><td>255.255.255.128</td><td>126</td><td>Half of a /24</td></tr>
+                            <tr><td>/26</td><td>255.255.255.192</td><td>62</td><td>Quarter of a /24</td></tr>
+                            <tr><td>/27</td><td>255.255.255.224</td><td>30</td><td>Server VLAN, DMZ</td></tr>
+                            <tr><td>/28</td><td>255.255.255.240</td><td>14</td><td>Small segment</td></tr>
+                            <tr><td>/30</td><td>255.255.255.252</td><td>2</td><td>Point-to-point link</td></tr>
+                            <tr><td>/32</td><td>255.255.255.255</td><td>1</td><td>Single host route</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEARN PAGE -->
+        <div class="page" id="page-learn">
+            <div class="page-header">
+                <h1>Learn</h1>
+                <p class="page-subtitle">Network security concepts and terminology</p>
+            </div>
+
+            <div class="learn-grid">
+                <div class="learn-card">
+                    <div class="learn-icon" style="background: rgba(99,102,241,0.15); color: #818cf8;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <h3>OSI Model</h3>
+                    <p>The 7-layer model that explains how network communication works. From physical cables (Layer 1) to applications (Layer 7). Understanding this is fundamental to network security.</p>
+                    <div class="learn-layers">
+                        <span class="layer l7">7. Application</span>
+                        <span class="layer l6">6. Presentation</span>
+                        <span class="layer l5">5. Session</span>
+                        <span class="layer l4">4. Transport</span>
+                        <span class="layer l3">3. Network</span>
+                        <span class="layer l2">2. Data Link</span>
+                        <span class="layer l1">1. Physical</span>
+                    </div>
+                </div>
+
+                <div class="learn-card">
+                    <div class="learn-icon" style="background: rgba(34,197,94,0.15); color: #4ade80;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <h3>TCP 3-Way Handshake</h3>
+                    <p>How TCP connections are established between two hosts. This is the foundation of port scanning.</p>
+                    <div class="handshake-diagram">
+                        <div class="hs-step"><span class="hs-arrow">→</span> SYN <span class="hs-desc">Client initiates</span></div>
+                        <div class="hs-step"><span class="hs-arrow">←</span> SYN-ACK <span class="hs-desc">Server acknowledges</span></div>
+                        <div class="hs-step"><span class="hs-arrow">→</span> ACK <span class="hs-desc">Connection established</span></div>
+                    </div>
+                </div>
+
+                <div class="learn-card">
+                    <div class="learn-icon" style="background: rgba(251,191,36,0.15); color: #fbbf24;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h3>Port States</h3>
+                    <p>What different scan results mean from a security perspective.</p>
+                    <div class="port-states">
+                        <div class="ps"><span class="ps-badge open">OPEN</span> Service is listening - potential attack surface</div>
+                        <div class="ps"><span class="ps-badge closed">CLOSED</span> No service listening - host is alive</div>
+                        <div class="ps"><span class="ps-badge filtered">FILTERED</span> Firewall blocking - can't determine state</div>
+                    </div>
+                </div>
+
+                <div class="learn-card">
+                    <div class="learn-icon" style="background: rgba(168,85,247,0.15); color: #a855f7;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <h3>Common Security Risks</h3>
+                    <p>Ports and services that frequently pose security risks in enterprise networks.</p>
+                    <div class="risk-list">
+                        <div class="risk-item high">Port 23 (Telnet) - Unencrypted remote access</div>
+                        <div class="risk-item high">Port 445 (SMB) - Ransomware vector (WannaCry)</div>
+                        <div class="risk-item high">Port 502 (Modbus) - No authentication (OT/ICS)</div>
+                        <div class="risk-item medium">Port 3389 (RDP) - Brute force target</div>
+                        <div class="risk-item medium">Port 161 (SNMP) - Information leak</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
