@@ -16,7 +16,7 @@ What is Banner Grabbing?
 Security Implications:
 - Detailed banners help attackers identify vulnerable versions
 - Best practice: Minimize banner information (banner hardening)
-- In Tüpraş, knowing exact service versions helps the security
+- In enterprise environments, knowing exact service versions helps the security
   team prioritize patching and identify unauthorized services
 """
 

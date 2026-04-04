@@ -21,7 +21,7 @@ Scan Techniques:
 Why Port Scanning Matters for Security:
 - Every open port is a potential attack vector
 - Unnecessary open ports should be closed (principle of least privilege)
-- In a refinery like Tüpraş, Modbus (502) and other OT ports must be
+- In an industrial environment, Modbus (502) and other OT ports must be
   carefully controlled between IT and OT network segments
 """
 

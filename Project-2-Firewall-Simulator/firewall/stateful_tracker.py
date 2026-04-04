@@ -93,7 +93,7 @@ class StatefulTracker:
     - Indexed by a connection key: (src_ip, dst_ip, src_port, dst_port, protocol)
     - Automatically expires idle connections (configurable timeout)
     
-    In enterprise firewalls at Tupras, the connection table could
+    In enterprise firewalls, the connection table could
     track millions of simultaneous connections across 4 refineries.
     """
 

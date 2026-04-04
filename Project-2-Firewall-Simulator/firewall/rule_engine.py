@@ -30,7 +30,7 @@ Rule Structure:
 │  DEFAULT POLICY: DENY ALL                           │
 └─────────────────────────────────────────────────────┘
 
-Enterprise Context (Tupras):
+Enterprise Context:
 - Firewalls sit between IT and OT networks
 - Rules control what traffic can cross between zones
 - Modbus (port 502) from IT to OT must be strictly controlled
@@ -143,7 +143,7 @@ class RuleEngine:
         Security Best Practice:
         - Default DENY (whitelist approach): Only allow explicitly permitted traffic
         - Default ALLOW (blacklist approach): Block only known bad traffic
-        - Enterprise networks like Tupras use Default DENY for maximum security
+        - Enterprise networks use Default DENY for maximum security
         """
         self.rules: List[FirewallRule] = []
         self.default_policy = default_policy.upper()

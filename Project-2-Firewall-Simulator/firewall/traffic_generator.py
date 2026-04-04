@@ -30,7 +30,7 @@ class TrafficGenerator:
     Generates realistic network traffic for firewall testing.
     
     Traffic profiles simulate real-world scenarios you'd find
-    in an enterprise network like Tupras.
+    in a typical industrial enterprise network.
     """
 
     # Network topology simulation

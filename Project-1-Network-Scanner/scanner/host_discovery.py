@@ -40,7 +40,7 @@ class HostDiscovery:
     """
     Discovers active hosts on a network using multiple scanning techniques.
     
-    In a corporate environment like Tüpraş (10,000+ clients, 500+ servers),
+    In a large corporate environment (10,000+ clients, 500+ servers),
     asset discovery is the FIRST step in security management. You cannot
     secure devices you don't know about.
     """
@@ -198,7 +198,7 @@ class HostDiscovery:
         Scan a list of IP addresses for active hosts.
         
         Uses multi-threading for parallel scanning. In a large network
-        like Tüpraş with thousands of devices, sequential scanning would
+        like an industrial plant with thousands of devices, sequential scanning would
         take too long. With 100 threads, we can scan a /24 subnet 
         (254 hosts) in seconds.
         

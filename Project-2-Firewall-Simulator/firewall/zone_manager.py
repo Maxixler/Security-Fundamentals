@@ -24,7 +24,7 @@ Common Zones:
 │  Reverse proxy       │   Modbus/OPC-UA devices        │
 └──────────────────────┴─────────────────────────────────┘
 
-Tupras Context - Purdue Model:
+Enterprise Context - Purdue Model:
 Level 5: Enterprise Network (IT)
 Level 4: Business Planning (IT/OT boundary)
 Level 3.5: DMZ (data diode, historians)
@@ -111,7 +111,7 @@ class ZoneManager:
     def _setup_default_zones(self):
         """
         Create default zones that simulate an industrial network.
-        These represent the Purdue Model levels used at Tupras.
+        These represent the Purdue Model levels used in industrial networks.
         """
         default_zones = [
             Zone(

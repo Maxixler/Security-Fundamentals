@@ -1,67 +1,70 @@
-async function fetchStats() {
+const API = window.location.origin;
+
+async function fetchSiemData() {
     try {
-        const res = await fetch('/api/stats');
+        const res = await fetch(`${API}/api/status`);
         const data = await res.json();
-        document.getElementById('stat-events').innerText = data.total_events || 0;
-        document.getElementById('stat-alerts').innerText = data.total_alerts || 0;
-    } catch(e) { console.error(e); }
-}
-
-async function fetchEvents() {
-    try {
-        const res = await fetch('/api/events');
-        const events = await res.json();
-        const tbody = document.querySelector('#events-table tbody');
-        tbody.innerHTML = '';
         
-        events.forEach(evt => {
-            const tr = document.createElement('tr');
-            const time = new Date(evt.timestamp).toLocaleTimeString();
-            const actionMsg = evt.msg || evt.action;
-            tr.innerHTML = `
-                <td>${time}</td>
-                <td>${evt.source_type}</td>
-                <td>${evt.src_ip || 'N/A'}</td>
-                <td class="sev-${evt.severity}">${evt.severity}</td>
-                <td>${actionMsg}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch(e) { console.error(e); }
+        renderIncidents(data.alerts);
+        renderLogs(data.recent_logs);
+    } catch (err) {
+        console.error("SIEM API Error:", err);
+    }
 }
 
-async function fetchAlerts() {
-    try {
-        const res = await fetch('/api/alerts');
-        const alerts = await res.json();
-        const container = document.getElementById('alerts-container');
-        container.innerHTML = '';
+function renderIncidents(incidents) {
+    const container = document.getElementById('incidents-container');
+    
+    if (incidents.length === 0) {
+        container.innerHTML = '<div class="empty-state">Monitoring active. No threats correlated.</div>';
+        return;
+    }
+
+    let html = '';
+    incidents.forEach(inc => {
+        html += `
+            <div class="incident-card inc-${inc.severity}">
+                <div class="inc-header">
+                    <span class="inc-time">${inc.timestamp || new Date().toLocaleTimeString()}</span>
+                    <span class="inc-badge badge-${inc.severity}">${inc.severity}</span>
+                </div>
+                <div class="inc-desc">${inc.description}</div>
+                <div class="inc-meta">
+                    <span>SRC: ${inc.src_ip}</span>
+                    <span>TGT: ${inc.target}</span>
+                    <span>GEO: ${inc.country}</span>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function renderLogs(logs) {
+    const tbody = document.getElementById('logs-body');
+    let html = '';
+    
+    logs.forEach(log => {
+        // Extract time from raw if possible, else just use a generated one
+        let timeMatch = log.timestamp.split(" ")[1] || log.timestamp;
         
-        if (alerts.length === 0) {
-            container.innerHTML = '<p style="color:#aaffaa">NO ACTIVE THREATS DETECTED.</p>';
-            return;
-        }
-
-        alerts.forEach(alert => {
-            const time = new Date(alert.timestamp).toLocaleTimeString();
-            const div = document.createElement('div');
-            div.className = 'alert-card';
-            div.innerHTML = `
-                <h4>[!] ${alert.rule_name}</h4>
-                <div class="alert-meta">TIME: ${time}</div>
-                <div class="alert-meta">SEVERITY: ${alert.severity}</div>
-                <div>${alert.description}</div>
-            `;
-            container.appendChild(div);
-        });
-    } catch(e) { console.error(e); }
+        let typeBadge = `<span class="src-${log.source}">${log.source.toUpperCase()}</span>`;
+        let actionClass = `act-${log.action}`;
+        
+        html += `
+            <tr class="log-row">
+                <td>${timeMatch}</td>
+                <td>${typeBadge}</td>
+                <td>${log.event_type}</td>
+                <td>${log.src_ip || log.username || '-'}</td>
+                <td class="${actionClass}">${log.action}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
 }
 
-function updateDashboard() {
-    fetchStats();
-    fetchEvents();
-    fetchAlerts();
-}
-
-updateDashboard();
-setInterval(updateDashboard, 2000);
+// Fetch every 1.5 seconds to simulate real-time log ingestion
+setInterval(fetchSiemData, 1500);
+fetchSiemData();

@@ -2,51 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SIEM Hacker Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise SIEM Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>[ TUPRAS SIEM DASHBOARD ]</h1>
-            <div class="status-indicator">SYSTEM STATUS: <span class="blink">ONLINE</span></div>
+    <div class="siem-grid">
+        <!-- Top Navbar -->
+        <header class="top-nav">
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <h1>ENTERPRISE SOC / SIEM</h1>
+            </div>
+            <div class="system-stats">
+                <span class="stat-badge"><span class="dot"></span> SYSTEM ONLINE</span>
+                <span class="stat-badge fw-badge">FIREWALL: ACTIVE</span>
+                <span class="stat-badge ad-badge">AD/LDAP: ACTIVE</span>
+            </div>
         </header>
-        
-        <div class="stats-panel">
-            <div class="stat-box">
-                <h3>TOTAL EVENTS</h3>
-                <div id="stat-events">0</div>
-            </div>
-            <div class="stat-box warning">
-                <h3>ACTIVE ALERTS</h3>
-                <div id="stat-alerts">0</div>
-            </div>
-        </div>
 
-        <div class="main-grid">
-            <div class="events-panel section">
-                <h2>> REALTIME EVENTS LOG</h2>
-                <div class="table-container">
-                    <table id="events-table">
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Left Side: Incidents / Threat Map -->
+            <section class="incidents-panel">
+                <div class="panel-header">
+                    <h2><span class="highlight">]</span> CORRELATED THREAT INCIDENTS</h2>
+                </div>
+                <div class="incidents-list" id="incidents-container">
+                    <!-- Javascript populates this -->
+                    <div class="empty-state">Waiting for correlation engine events...</div>
+                </div>
+            </section>
+
+            <!-- Right Side: Raw Log Ingestion -->
+            <section class="logs-panel">
+                <div class="panel-header">
+                    <h2><span class="highlight">]</span> RAW LOG INGESTION (NORMALIZED)</h2>
+                </div>
+                <div class="table-wrapper">
+                    <table class="logs-table">
                         <thead>
                             <tr>
                                 <th>TIME</th>
                                 <th>SOURCE</th>
+                                <th>TYPE</th>
                                 <th>SRC IP</th>
-                                <th>SEVERITY</th>
-                                <th>MSG/ACTION</th>
+                                <th>ACTION</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody id="logs-body">
+                            <!-- Javascript populates this -->
+                        </tbody>
                     </table>
                 </div>
-            </div>
-            
-            <div class="alerts-panel section">
-                <h2>> CRITICAL THREAT ALERTS</h2>
-                <div id="alerts-container"></div>
-            </div>
+            </section>
         </div>
     </div>
     <script src="app.js"></script>

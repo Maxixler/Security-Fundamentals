@@ -7,7 +7,7 @@ In a corporate environment, reporting is critical:
 - Security teams need clear, actionable reports
 - Management needs executive summaries with risk levels
 - Compliance requires documented evidence of security assessments
-- ISO 27001 (used at Tüpraş) requires regular security reviews
+- ISO 27001 requires regular security reviews
 """
 
 import json

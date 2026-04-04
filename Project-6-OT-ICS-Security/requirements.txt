@@ -1,0 +1,4 @@
+pymodbus==3.6.4
+flask==3.0.2
+flask-cors==4.0.0
+scapy==2.5.0

@@ -8,7 +8,7 @@ The main firewall engine that combines:
 - Traffic logging and statistics
 
 This is the central piece that ties all modules together.
-In a real enterprise like Tupras, this engine would be
+In a real enterprise, this engine would be
 running on dedicated hardware processing millions of packets/second.
 """
 
