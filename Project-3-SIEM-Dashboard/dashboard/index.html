@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SIEM Hacker Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>[ TUPRAS SIEM DASHBOARD ]</h1>
+            <div class="status-indicator">SYSTEM STATUS: <span class="blink">ONLINE</span></div>
+        </header>
+        
+        <div class="stats-panel">
+            <div class="stat-box">
+                <h3>TOTAL EVENTS</h3>
+                <div id="stat-events">0</div>
+            </div>
+            <div class="stat-box warning">
+                <h3>ACTIVE ALERTS</h3>
+                <div id="stat-alerts">0</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="events-panel section">
+                <h2>> REALTIME EVENTS LOG</h2>
+                <div class="table-container">
+                    <table id="events-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>SOURCE</th>
+                                <th>SRC IP</th>
+                                <th>SEVERITY</th>
+                                <th>MSG/ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="alerts-panel section">
+                <h2>> CRITICAL THREAT ALERTS</h2>
+                <div id="alerts-container"></div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

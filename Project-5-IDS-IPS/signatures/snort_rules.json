@@ -1,0 +1,30 @@
+[
+  {
+    "id": 10001,
+    "action": "DROP",
+    "protocol": "TCP",
+    "content": "1=1",
+    "msg": "Possible SQL Injection Detected"
+  },
+  {
+    "id": 10002,
+    "action": "ALERT",
+    "protocol": "TCP",
+    "content": "<script>",
+    "msg": "Cross-Site Scripting (XSS) Attempt"
+  },
+  {
+    "id": 10003,
+    "action": "DROP",
+    "protocol": "UDP",
+    "content": "nmap",
+    "msg": "NMAP Scan Signature Detected"
+  },
+  {
+    "id": 10004,
+    "action": "DROP",
+    "protocol": "TCP",
+    "content": "../passwd",
+    "msg": "Directory Traversal / LFI Attempt"
+  }
+]

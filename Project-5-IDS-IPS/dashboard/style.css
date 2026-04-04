@@ -1,0 +1,118 @@
+:root {
+    --matrix-green: #00ff41;
+    --matrix-dark: #0d0208;
+    --alert-red: #ff003c;
+    --warn-yellow: #ffb800;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--matrix-dark);
+    color: var(--matrix-green);
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+}
+
+/* Background grid effect */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: -1;
+}
+
+.container {
+    max-width: 1500px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--matrix-green);
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px var(--matrix-green);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 20px;
+}
+
+.panel {
+    border: 1px solid var(--matrix-green);
+    background: rgba(0, 255, 65, 0.05);
+    padding: 15px;
+    box-shadow: inset 0 0 10px rgba(0,255,65,0.1);
+}
+
+.panel h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    border-bottom: 1px dashed var(--matrix-green);
+    padding-bottom: 10px;
+}
+
+.log-panel {
+    height: 75vh;
+}
+
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stats p { font-size: 1.2rem; }
+
+.blacklist {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 48vh;
+}
+
+#banned-list li {
+    color: var(--alert-red);
+    text-shadow: 0 0 5px var(--alert-red);
+    margin-bottom: 5px;
+}
+
+/* Terminal stream scroll container */
+#log-stream {
+    height: calc(100% - 40px);
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.log-entry {
+    margin-bottom: 6px;
+    line-height: 1.4;
+    word-break: break-all;
+    animation: fadeIn 0.3s ease-in;
+    font-size: 0.95em;
+}
+
+.alert-text, .log-THREAT_DETECTED { color: var(--warn-yellow); }
+.crit-text, .log-BLOCKED { color: var(--alert-red); animation: glitch 2.5s infinite; font-weight: bold;}
+.pass-text, .log-PASSED { color: var(--matrix-green); opacity: 0.8; }
+
+.blink { animation: blinker 1s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes glitch {
+  0% { transform: translate(0) }
+  2% { transform: translate(-2px, 1px) }
+  4% { transform: translate(0px, -1px) }
+  6% { transform: translate(2px, 1px) }
+  8% { transform: translate(-1px, 0px) }
+  10% { transform: translate(0) }
+}

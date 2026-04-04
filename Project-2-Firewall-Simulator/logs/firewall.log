@@ -107,3 +107,264 @@
 2026-04-04T00:21:30.820447 ALLOW  TCP      10.10.1.20:54981 ->      10.10.3.50:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
 2026-04-04T00:21:30.820974  DENY  TCP    192.168.1.20:57193 ->     172.16.0.30:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
 2026-04-04T00:22:59.057973  DENY  TCP    192.168.1.10:54321 ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:14:39.152272 ALLOW  TCP      10.10.1.10:5000  ->     10.10.2.200:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:14:39.153776  DENY  TCP    192.168.1.10:5000  ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:14:39.155280  DENY  TCP         8.8.8.8:5000  ->    192.168.1.10:23    zone=untrusted->trusted state=NEW rule=8 | Rule #8: Block Telnet
+2026-04-04T03:14:39.156287 ALLOW  TCP    192.168.1.10:5000  ->         8.8.8.8:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.536533 ALLOW  TCP    192.168.1.10:56463 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.537642  DENY  UDP       10.0.0.15:53685 ->    192.168.1.50:162   zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.538170  DENY  TCP    192.168.2.30:53723 ->   192.168.1.100:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.538685  DENY  TCP    192.168.2.30:53862 ->    104.244.42.1:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.539311 ALLOW  UDP    192.168.1.20:57409 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.539311  DENY  TCP    192.168.2.30:55288 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.539311 ALLOW  TCP    192.168.1.20:63015 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.540318 ALLOW  UDP    192.168.1.20:61131 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.540318  DENY  TCP       10.0.0.10:60246 ->   192.168.1.100:3389  zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.541318 ALLOW  TCP    192.168.1.10:55954 ->    203.0.113.50:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.541318 ALLOW  TCP   192.168.1.100:61416 ->         8.8.8.8:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.541318  DENY  TCP    192.168.2.30:52153 ->    203.0.113.50:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.541318  DENY  TCP    192.168.1.20:54150 ->     172.16.0.20:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.542823  DENY  UDP    192.168.2.15:51053 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.543472  DENY  TCP    192.168.1.20:64390 ->    192.168.2.15:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.543984  DENY  TCP    192.168.2.15:62657 ->    104.244.42.1:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.543984 ALLOW  TCP   192.168.1.100:58736 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.544522  DENY  TCP    192.168.2.30:64466 ->    203.0.113.50:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.545055 ALLOW  TCP    192.168.1.10:56699 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.545588  DENY  TCP    192.168.2.30:56156 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.545588 ALLOW  UDP   192.168.1.100:61124 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.546114 ALLOW  TCP    192.168.1.20:50536 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.546647 ALLOW  TCP    192.168.1.20:61360 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.547171 ALLOW  UDP   192.168.1.100:62161 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.547171  DENY  TCP    192.168.2.30:60905 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.547688  DENY  TCP    192.168.2.15:55018 ->   192.168.1.100:3306  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.548216 ALLOW  TCP    192.168.1.50:65419 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.548743  DENY  TCP    192.168.1.10:57253 ->    192.168.1.10:1433  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.549254 ALLOW  UDP    192.168.1.50:60912 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.549254  DENY  TCP    192.168.2.15:55995 ->   198.51.100.25:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.549774  DENY  TCP    192.168.2.30:49225 ->     172.16.0.11:25    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.550304  DENY  TCP    192.168.1.10:56842 ->    192.168.1.20:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.550821  DENY  UDP       10.0.0.10:54408 ->    192.168.2.15:162   zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.551352 ALLOW  TCP    192.168.1.20:62279 ->    203.0.113.50:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.551352 ALLOW  TCP    192.168.1.10:60322 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.551902  DENY  TCP    192.168.2.30:57219 ->    104.244.42.1:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.552427 ALLOW  TCP   192.168.1.100:51110 ->    203.0.113.50:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.552954 ALLOW  TCP    192.168.1.10:62084 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.553473  DENY  TCP    192.168.2.30:55715 ->    192.168.2.30:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.553990 ALLOW  UDP   192.168.1.100:50309 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.553990 ALLOW  TCP       10.0.0.15:57262 ->   192.168.1.100:22    zone=management->trusted state=NEW rule=5 | Rule #5: Allow SSH Admin
+2026-04-04T03:19:56.554512  DENY  TCP    192.168.1.20:57083 ->    192.168.2.15:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.555237  DENY  UDP    192.168.2.15:62943 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.555755 ALLOW  TCP    192.168.1.10:53522 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.555755 ALLOW  TCP    192.168.1.20:60390 ->     172.16.0.11:25    zone=trusted->dmz state=NEW rule=7 | Rule #7: Allow SMTP to DMZ
+2026-04-04T03:19:56.556390 ALLOW  TCP    192.168.1.50:51900 ->         8.8.8.8:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.556390  DENY  TCP    192.168.1.10:59613 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.557396  DENY  TCP   192.168.1.100:53984 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.557901  DENY  TCP        10.0.0.5:63540 ->   192.168.1.100:3389  zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.557901  DENY  TCP    192.168.2.30:61417 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.558908  DENY  TCP   192.168.1.100:64673 ->    192.168.2.15:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.558908 ALLOW  TCP    192.168.1.10:64520 ->         1.1.1.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.558908  DENY  TCP    192.168.2.30:53818 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.559909  DENY  TCP    192.168.1.20:58956 ->     172.16.0.10:465   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.559909 ALLOW  UDP    192.168.1.10:49311 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.559909  DENY  TCP    192.168.2.30:64258 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.561416  DENY  TCP    192.168.1.50:54545 ->    192.168.2.30:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.561416 ALLOW  TCP    192.168.1.50:54305 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.562423 ALLOW  TCP    192.168.1.10:61627 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.562423  DENY  TCP    192.168.2.15:50700 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.562423  DENY  TCP    192.168.1.50:54130 ->    192.168.1.20:3306  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.563931  DENY  TCP       10.0.0.10:56233 ->   192.168.1.100:3389  zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.564495 ALLOW  UDP    192.168.1.10:58554 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.564495  DENY  UDP    192.168.2.30:60265 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.564495 ALLOW  TCP    192.168.1.20:64740 ->         1.1.1.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:19:56.566025 ALLOW  UDP    192.168.1.50:64676 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.566597  DENY  TCP    192.168.2.30:50127 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.566597  DENY  TCP    192.168.2.30:55200 ->    192.168.1.20:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.568108  DENY  TCP   192.168.1.100:64833 ->   192.168.1.100:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.568108  DENY  TCP    192.168.1.10:63329 ->    192.168.1.20:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.569120  DENY  TCP      10.10.3.50:59598 ->     10.10.2.200:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.569120  DENY  TCP    192.168.2.30:53153 ->     172.16.0.30:25    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.570118 ALLOW  UDP    192.168.1.10:54729 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.570118 ALLOW  TCP    192.168.1.20:58705 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.571119  DENY  TCP   192.168.1.100:61956 ->   192.168.1.100:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.571623  DENY  TCP    192.168.2.30:60395 ->   151.101.1.140:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.571623  DENY  TCP   192.168.1.100:54615 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.572628  DENY  UDP    192.168.2.30:55420 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.572628 ALLOW  TCP   192.168.1.100:64081 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.572628  DENY  TCP     10.10.2.100:60423 ->     10.10.2.100:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.573628 ALLOW  TCP    192.168.1.10:60512 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.573628  DENY  UDP    192.168.2.30:65030 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.573628  DENY  UDP    192.168.2.30:56066 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.573628  DENY  TCP    192.168.1.20:64987 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.575227 ALLOW  TCP    192.168.1.10:61807 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.575227  DENY  TCP    192.168.1.20:57343 ->    192.168.2.30:1433  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.575227  DENY  TCP    192.168.2.30:51486 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.576239 ALLOW  TCP    192.168.1.20:56202 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.576239 ALLOW  UDP    192.168.1.20:56818 ->       10.0.0.15:514   zone=trusted->management state=NEW rule=13 | Rule #13: Allow Syslog to SIEM
+2026-04-04T03:19:56.576239  DENY  TCP    192.168.2.30:53839 ->     172.16.0.20:993   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.577746  DENY  TCP    192.168.2.15:60654 ->   151.101.1.140:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.577746 ALLOW  TCP    192.168.1.50:58057 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.577746  DENY  TCP   192.168.1.100:60253 ->    192.168.1.20:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.578755  DENY  TCP    192.168.2.30:60598 ->     172.16.0.30:25    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.579763  DENY  TCP    192.168.1.50:52788 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.579763 ALLOW  TCP    192.168.1.20:58779 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:19:56.580761 ALLOW  UDP    192.168.1.20:61811 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:19:56.580761 ALLOW  TCP    192.168.1.50:57485 ->     172.16.0.10:25    zone=trusted->dmz state=NEW rule=7 | Rule #7: Allow SMTP to DMZ
+2026-04-04T03:19:56.580761  DENY  TCP    192.168.2.30:62580 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:19:56.581761 ALLOW  TCP       10.0.0.15:65076 ->    192.168.1.50:22    zone=management->trusted state=NEW rule=5 | Rule #5: Allow SSH Admin
+2026-04-04T03:20:14.740140  DENY  TCP    192.168.2.30:54191 ->    192.168.2.30:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:14.955804 ALLOW  TCP    192.168.1.20:51928 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:15.158077  DENY  TCP         8.8.8.8:50078 ->     172.16.0.20:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:15.359265  DENY  TCP    104.244.42.1:63528 ->     172.16.0.20:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:15.561285  DENY  TCP    104.244.42.1:58978 ->    192.168.1.50:306   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:15.763326 ALLOW  TCP    192.168.1.50:64897 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:15.977297 ALLOW  TCP   192.168.1.100:54322 ->         1.1.1.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:16.179187  DENY  TCP         1.1.1.1:50780 ->     172.16.0.30:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:16.394666  DENY  TCP    192.168.1.50:59629 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:16.609880  DENY  TCP    192.168.1.20:62683 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:16.812426 ALLOW  TCP    192.168.1.20:65396 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:17.027881  DENY  TCP    192.168.2.15:54088 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:17.244386  DENY  TCP    192.168.1.20:56549 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:17.460898 ALLOW  UDP    192.168.1.20:52688 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:17.676561  DENY  TCP    192.168.2.30:60986 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:17.892652 ALLOW  TCP   192.168.1.100:49946 ->    104.244.42.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:18.107532  DENY  TCP    192.168.1.20:50338 ->      10.10.1.10:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:18.323022 ALLOW  TCP    192.168.1.20:54063 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:18.538065  DENY  TCP   93.184.216.34:55028 ->     172.16.0.30:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:18.753934  DENY  TCP    192.168.2.15:54986 ->    203.0.113.50:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:18.968506  DENY  TCP    192.168.2.15:55833 ->     10.10.2.100:502   zone=trusted->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:19.184046 ALLOW  TCP    192.168.1.50:59754 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:19.399824  DENY  UDP    192.168.2.30:53832 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:19.602377  DENY  TCP   192.168.1.100:62936 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:19.817609 ALLOW  UDP    192.168.1.10:52152 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:20.032021 ALLOW  UDP   192.168.1.100:62407 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:20.249321 ALLOW  TCP   192.168.1.100:59240 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:20.470413  DENY  TCP    192.168.2.15:50445 ->    192.168.2.30:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:20.682691  DENY  TCP   151.101.1.140:53008 ->    192.168.2.15:95    zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:20.898202  DENY  UDP    192.168.2.30:55024 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:21.099678  DENY  TCP    104.244.42.1:55348 ->    192.168.2.15:656   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:21.316288  DENY  TCP      10.10.1.20:56147 ->      10.10.1.10:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:21.518258  DENY  TCP    192.168.1.20:65507 ->     10.10.2.200:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:21.734239  DENY  TCP   93.184.216.34:54859 ->     172.16.0.30:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:21.935605  DENY  TCP    192.168.1.50:65180 ->     172.16.0.11:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:22.152442 ALLOW  TCP    192.168.1.20:61916 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:22.355383  DENY  TCP    192.168.1.20:55553 ->     172.16.0.20:465   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:22.557395 ALLOW  TCP   192.168.1.100:53802 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:22.772346 ALLOW  TCP    192.168.1.10:52283 ->         8.8.8.8:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:22.988137 ALLOW  TCP    192.168.1.10:56923 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:23.203357  DENY  TCP    192.168.2.30:60106 ->     172.16.0.10:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:23.418756 ALLOW  UDP    192.168.1.10:59106 ->       10.0.0.10:514   zone=trusted->management state=NEW rule=13 | Rule #13: Allow Syslog to SIEM
+2026-04-04T03:20:23.619934  DENY  TCP    192.168.1.10:60961 ->    192.168.2.30:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:23.822616 ALLOW  UDP    192.168.1.10:61734 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:24.037839  DENY  TCP   192.168.1.100:49983 ->      10.10.3.50:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:24.254009 ALLOW  TCP    192.168.1.20:55698 ->     172.16.0.30:25    zone=trusted->dmz state=NEW rule=7 | Rule #7: Allow SMTP to DMZ
+2026-04-04T03:20:24.455709 ALLOW  TCP     10.10.2.100:57396 ->      10.10.3.50:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:20:24.671612 ALLOW  TCP      10.10.3.50:58252 ->      10.10.1.10:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:20:24.873861 ALLOW  TCP   192.168.1.100:53054 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:25.089829 ALLOW  TCP   192.168.1.100:60006 ->   151.101.1.140:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:25.305386  DENY  TCP    192.168.1.10:63341 ->   192.168.1.100:3306  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:25.507973  DENY  TCP    192.168.2.30:60203 ->    192.168.2.15:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:25.723861 ALLOW  TCP      10.10.3.50:57038 ->     10.10.2.100:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:20:25.926370 ALLOW  UDP   192.168.1.100:62497 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:26.141066 ALLOW  UDP    192.168.2.30:51738 ->       10.0.0.15:514   zone=trusted->management state=NEW rule=13 | Rule #13: Allow Syslog to SIEM
+2026-04-04T03:20:26.343604  DENY  TCP    192.168.2.15:52040 ->     172.16.0.10:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:26.559330  DENY  UDP    192.168.2.30:56744 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:26.776380  DENY  TCP   198.51.100.25:56349 ->     172.16.0.11:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:26.992331  DENY  UDP    192.168.2.30:63630 ->     172.16.0.30:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:27.208519 ALLOW  TCP    192.168.1.50:62171 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:27.422227  DENY  UDP    192.168.2.30:62156 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:27.638742 ALLOW  TCP    192.168.1.20:51223 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:27.841768  DENY  TCP    192.168.1.50:58908 ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:28.058900 ALLOW  UDP    192.168.1.10:52988 ->       10.0.0.15:514   zone=trusted->management state=NEW rule=13 | Rule #13: Allow Syslog to SIEM
+2026-04-04T03:20:28.272165  DENY  TCP   151.101.1.140:61557 ->    192.168.1.50:27    zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:28.488098  DENY  TCP    192.168.1.20:50276 ->     172.16.0.10:587   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:28.705151  DENY  TCP   93.184.216.34:62908 ->    192.168.1.10:633   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:28.921462  DENY  TCP        10.0.0.5:61591 ->    192.168.2.15:3389  zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:29.122782 ALLOW  TCP    192.168.1.20:57308 ->    104.244.42.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:29.324862  DENY  TCP         8.8.8.8:56989 ->    192.168.2.30:655   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:29.540529 ALLOW  TCP    192.168.1.50:58845 ->   198.51.100.25:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:29.755363  DENY  TCP   192.168.1.100:59649 ->    192.168.2.15:1433  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:29.970295 ALLOW  UDP    192.168.1.50:62676 ->     172.16.0.10:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:30.183918  DENY  TCP       10.0.0.10:63878 ->    192.168.2.15:22    zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:30.399392 ALLOW  TCP   192.168.1.100:59087 ->   198.51.100.25:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:30.613962  DENY  TCP   198.51.100.25:61694 ->    192.168.2.30:603   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:30.830274  DENY  TCP    192.168.2.15:50630 ->    192.168.1.20:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:31.046397 ALLOW  TCP    192.168.1.10:49534 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:31.262578  DENY  TCP    192.168.1.50:55827 ->     172.16.0.20:465   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:31.478478  DENY  TCP    192.168.2.15:62595 ->    192.168.1.10:1433  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:31.680900  DENY  TCP    192.168.2.30:57533 ->    192.168.1.10:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:31.895519  DENY  TCP    192.168.2.30:57615 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:32.110732  DENY  TCP   192.168.1.100:61797 ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:32.325468 ALLOW  TCP    192.168.1.10:63942 ->   151.101.1.140:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:32.540270  DENY  TCP   93.184.216.34:53240 ->     172.16.0.20:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:32.756100 ALLOW  TCP    192.168.1.50:58330 ->     172.16.0.20:25    zone=trusted->dmz state=NEW rule=7 | Rule #7: Allow SMTP to DMZ
+2026-04-04T03:20:32.972795  DENY  TCP   192.168.1.100:64738 ->    192.168.2.15:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:33.187863  DENY  TCP    192.168.2.15:52078 ->     10.10.2.100:502   zone=trusted->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:33.403958 ALLOW  TCP    192.168.1.50:54500 ->         1.1.1.1:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:33.606512  DENY  TCP         1.1.1.1:55344 ->   192.168.1.100:434   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:33.823171  DENY  TCP    192.168.1.20:56380 ->     172.16.0.11:993   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:34.039480 ALLOW  TCP   192.168.1.100:49674 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:34.240546 ALLOW  TCP   192.168.1.100:58802 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:34.442212  DENY  TCP    192.168.2.15:59527 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:34.658165  DENY  TCP         8.8.8.8:59170 ->     172.16.0.20:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:34.873467 ALLOW  TCP        10.0.0.5:58091 ->   192.168.1.100:22    zone=management->trusted state=NEW rule=5 | Rule #5: Allow SSH Admin
+2026-04-04T03:20:35.089971 ALLOW  TCP    192.168.1.50:56849 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:35.291683 ALLOW  TCP    192.168.1.50:52293 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:35.495105  DENY  TCP    192.168.2.15:63390 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:35.698188  DENY  TCP     10.10.2.200:65325 ->     10.10.2.100:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:35.913851 ALLOW  TCP    192.168.1.10:50388 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:36.115805 ALLOW  TCP        10.0.0.5:56546 ->    192.168.1.50:22    zone=management->trusted state=NEW rule=5 | Rule #5: Allow SSH Admin
+2026-04-04T03:20:36.330657 ALLOW  TCP    192.168.1.10:56083 ->   151.101.1.140:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:36.545319  DENY  TCP    192.168.2.30:50220 ->    203.0.113.50:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:36.747271 ALLOW  TCP    192.168.1.20:55488 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:36.962423 ALLOW  TCP    192.168.1.20:61222 ->   198.51.100.25:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:37.164004 ALLOW  UDP    192.168.1.50:56752 ->        10.0.0.5:514   zone=trusted->management state=NEW rule=13 | Rule #13: Allow Syslog to SIEM
+2026-04-04T03:20:37.377921 ALLOW  TCP    192.168.1.50:64712 ->         1.1.1.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:37.591904  DENY  UDP        10.0.0.5:62841 ->    192.168.1.10:162   zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:37.806351 ALLOW  TCP   192.168.1.100:51546 ->   198.51.100.25:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:38.022346  DENY  TCP    192.168.2.15:58315 ->   151.101.1.140:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:38.238371  DENY  TCP     10.10.2.100:63375 ->     10.10.2.100:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:38.454227 ALLOW  TCP    192.168.1.10:51483 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:38.669603  DENY  TCP   192.168.1.100:49671 ->    192.168.2.30:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:38.871249  DENY  TCP   151.101.1.140:52424 ->    192.168.1.20:563   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:39.086262  DENY  TCP    192.168.1.50:59526 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:39.289177  DENY  TCP    192.168.2.15:51695 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:39.504346  DENY  TCP   93.184.216.34:60035 ->    192.168.2.15:64    zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:39.705519  DENY  TCP    192.168.2.30:64990 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:39.907774  DENY  TCP    192.168.2.15:57928 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:40.122477  DENY  TCP    192.168.2.30:54028 ->     10.10.2.100:502   zone=trusted->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:40.336705  DENY  TCP    192.168.1.20:58840 ->     10.10.2.200:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:40.553375  DENY  TCP    192.168.1.10:62895 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:40.768031  DENY  TCP    192.168.2.30:54193 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:40.983659  DENY  TCP      10.10.1.10:61166 ->     10.10.2.100:4840  zone=ot_network->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:41.199226 ALLOW  TCP      10.10.1.10:49817 ->      10.10.1.10:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:20:41.414508 ALLOW  UDP    192.168.1.20:52840 ->     172.16.0.11:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:41.615507  DENY  TCP    192.168.1.10:55100 ->    192.168.1.10:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:41.816616 ALLOW  TCP    192.168.1.50:56313 ->     172.16.0.10:25    zone=trusted->dmz state=NEW rule=7 | Rule #7: Allow SMTP to DMZ
+2026-04-04T03:20:42.018591  DENY  TCP    192.168.2.30:54316 ->    192.168.1.50:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:42.233692 ALLOW  TCP    192.168.1.10:54607 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:42.450016  DENY  TCP   192.168.1.100:51992 ->      10.10.1.10:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:42.664894 ALLOW  TCP      10.10.1.20:49718 ->      10.10.3.50:502   zone=ot_network->ot_network state=NEW rule=11 | Rule #11: Allow OT Modbus Internal
+2026-04-04T03:20:42.878642  DENY  TCP   192.168.1.100:65339 ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=9 | Rule #9: Block IT to OT Modbus
+2026-04-04T03:20:43.080833  DENY  TCP    192.168.1.20:58742 ->     172.16.0.20:465   zone=trusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:43.296412  DENY  TCP    192.168.1.10:61623 ->    192.168.2.30:1433  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:43.511603  DENY  TCP    203.0.113.50:57279 ->     172.16.0.11:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:43.712887  DENY  TCP    192.168.2.15:51296 ->     10.10.2.100:502   zone=trusted->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:43.914622  DENY  TCP    192.168.2.15:57148 ->      10.10.1.20:502   zone=trusted->ot_network state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:44.130455 ALLOW  TCP    192.168.1.10:60475 ->    104.244.42.1:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:44.345038 ALLOW  TCP   192.168.1.100:59385 ->         8.8.8.8:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:44.560859 ALLOW  UDP   192.168.1.100:51999 ->     172.16.0.20:53    zone=trusted->dmz state=NEW rule=2 | Rule #2: Allow DNS
+2026-04-04T03:20:44.775768  DENY  TCP    192.168.1.20:51924 ->    192.168.1.20:5432  zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:44.994137  DENY  TCP         8.8.8.8:64126 ->     172.16.0.11:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:45.209852  DENY  UDP        10.0.0.5:53032 ->    192.168.2.15:161   zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:45.426710 ALLOW  TCP    192.168.1.10:58797 ->   198.51.100.25:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:45.641409  DENY  TCP         1.1.1.1:49581 ->    192.168.1.50:931   zone=untrusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:45.860301  DENY  TCP    203.0.113.50:50520 ->     172.16.0.11:22    zone=untrusted->dmz state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:46.074936 ALLOW  TCP    192.168.1.10:58014 ->         8.8.8.8:443   zone=trusted->untrusted state=NEW rule=3 | Rule #3: Allow HTTPS Out
+2026-04-04T03:20:46.276709 ALLOW  TCP        10.0.0.5:56041 ->   192.168.1.100:22    zone=management->trusted state=NEW rule=5 | Rule #5: Allow SSH Admin
+2026-04-04T03:20:46.478984  DENY  UDP       10.0.0.10:63564 ->    192.168.1.50:161   zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:46.680806  DENY  TCP    192.168.2.30:62246 ->   93.184.216.34:443   zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:46.897262  DENY  TCP    192.168.2.15:63671 ->   192.168.1.100:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:47.100641  DENY  TCP       10.0.0.10:64311 ->   192.168.1.100:3389  zone=management->trusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:47.316045  DENY  TCP    192.168.2.15:59929 ->   93.184.216.34:80    zone=trusted->untrusted state=NEW rule=14 | Rule #14: Log and Deny All
+2026-04-04T03:20:47.531902 ALLOW  TCP    192.168.1.10:60100 ->    203.0.113.50:80    zone=trusted->untrusted state=NEW rule=4 | Rule #4: Allow HTTP Out
+2026-04-04T03:20:47.748224  DENY  TCP    192.168.1.10:57028 ->    192.168.2.15:445   zone=trusted->trusted state=NEW rule=14 | Rule #14: Log and Deny All

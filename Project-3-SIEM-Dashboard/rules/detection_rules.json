@@ -1,0 +1,28 @@
+[
+  {
+    "id": "R001",
+    "name": "Brute Force Attack",
+    "type": "threshold",
+    "condition": {
+      "action": "LOGIN_FAILED"
+    },
+    "group_by": "src_ip",
+    "threshold": 5,
+    "time_window_seconds": 60,
+    "severity": "CRITICAL",
+    "description": "Multiple failed login attempts from a single source."
+  },
+  {
+    "id": "R002",
+    "name": "Port Scan Detected",
+    "type": "threshold",
+    "condition": {
+      "action": "DENY"
+    },
+    "group_by": "src_ip",
+    "threshold": 10,
+    "time_window_seconds": 60,
+    "severity": "HIGH",
+    "description": "High number of blocked connections from a single IP."
+  }
+]

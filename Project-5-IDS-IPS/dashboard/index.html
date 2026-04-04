@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Matrix IDS/IPS Core</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="container">
+        <header>
+            <h1>[ IDS/IPS DEEP PACKET INSPECTION CORE ]</h1>
+            <div class="status">ENGINE: <span class="blink">SNIFFING</span></div>
+        </header>
+
+        <div class="content grid">
+            <div class="panel log-panel">
+                <h2>> NETWORK TRAFFIC STREAM</h2>
+                <div id="log-stream" class="terminal-text"></div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="panel stats">
+                    <h2>> SYSTEM STATUS</h2>
+                    <p>Total Analyzed: <span id="total-pkts">0</span></p>
+                    <p>Threats Blocked: <span id="total-blocks" class="alert-text">0</span></p>
+                </div>
+                
+                <div class="panel blacklist">
+                    <h2>> ACTIVE IPS FIREWALL (BANNED IPS)</h2>
+                    <ul id="banned-list" class="terminal-text"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
