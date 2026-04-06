@@ -2,36 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Matrix IDS/IPS Core</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDS/IPS — Intrusion Detection & Prevention</title>
+    <meta name="description" content="Real-time intrusion detection and prevention dashboard with signature matching, anomaly detection, and MITRE ATT&CK mapping">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="overlay"></div>
-    <div class="container">
-        <header>
-            <h1>[ IDS/IPS DEEP PACKET INSPECTION CORE ]</h1>
-            <div class="status">ENGINE: <span class="blink">SNIFFING</span></div>
+    <div id="ids-app">
+        <header class="top-bar">
+            <div class="brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div><h1>IDS / IPS ENGINE</h1><span>Intrusion Detection & Prevention System</span></div>
+            </div>
+            <div class="top-indicators">
+                <div class="indicator"><span class="pulse-dot"></span><span>ENGINE ACTIVE</span></div>
+                <div class="indicator"><span id="rule-count">0</span><span>RULES</span></div>
+                <div class="indicator"><span id="pps">0</span><span>PKT/S</span></div>
+                <span class="clock" id="clock">00:00:00</span>
+            </div>
         </header>
 
-        <div class="content grid">
-            <div class="panel log-panel">
-                <h2>> NETWORK TRAFFIC STREAM</h2>
-                <div id="log-stream" class="terminal-text"></div>
-            </div>
-            
-            <div class="side-panel">
-                <div class="panel stats">
-                    <h2>> SYSTEM STATUS</h2>
-                    <p>Total Analyzed: <span id="total-pkts">0</span></p>
-                    <p>Threats Blocked: <span id="total-blocks" class="alert-text">0</span></p>
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-icon crit-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div><div><span class="stat-val" id="stat-alerts">0</span><span class="stat-label">Alerts</span></div></div>
+            <div class="stat-card"><div class="stat-icon warn-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div><span class="stat-val" id="stat-analyzed">0</span><span class="stat-label">Packets</span></div></div>
+            <div class="stat-card"><div class="stat-icon info-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/></svg></div><div><span class="stat-val" id="stat-sigs">0</span><span class="stat-label">Sig Matches</span></div></div>
+            <div class="stat-card"><div class="stat-icon danger-bg"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div><span class="stat-val" id="stat-blocked">0</span><span class="stat-label">Blocked IPs</span></div></div>
+        </div>
+
+        <div class="main-grid">
+            <section class="panel alert-panel">
+                <div class="panel-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> Active Threats</h2><span class="count-badge" id="alert-count">0</span></div>
+                <div class="alert-list" id="alert-container"></div>
+            </section>
+
+            <section class="panel packet-panel">
+                <div class="panel-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Live Packet Stream</h2></div>
+                <div class="packet-table-wrap">
+                    <table class="packet-table">
+                        <thead><tr><th>PROTO</th><th>SOURCE</th><th>DESTINATION</th><th>FLAGS</th><th>SIZE</th><th>VERDICT</th></tr></thead>
+                        <tbody id="packet-body"></tbody>
+                    </table>
                 </div>
-                
-                <div class="panel blacklist">
-                    <h2>> ACTIVE IPS FIREWALL (BANNED IPS)</h2>
-                    <ul id="banned-list" class="terminal-text"></ul>
-                </div>
-            </div>
+            </section>
+        </div>
+
+        <div class="bottom-grid">
+            <section class="panel banned-panel">
+                <div class="panel-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Blocked IPs (IPS)</h2></div>
+                <div class="banned-list" id="banned-container"><p class="empty-msg">No blocked IPs</p></div>
+            </section>
+            <section class="panel rules-panel">
+                <div class="panel-head"><h2><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Detection Rules</h2></div>
+                <div class="rules-list" id="rules-container"></div>
+            </section>
         </div>
     </div>
     <script src="app.js"></script>

@@ -3,108 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OT/ICS HMI & Security Monitor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>OT/ICS SCADA Security Monitor</title>
+    <meta name="description" content="Industrial SCADA HMI dashboard for OT/ICS security monitoring with PLC register visualization, anomaly detection, and attack alerts">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="hmi-container">
-        <!-- Header -->
-        <header class="hmi-header">
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <div class="logo-text">
-                    <h1>INDUSTRIAL OT/ICS</h1>
-                    <span>Unit B-404 Boiler HMI & Security Monitor</span>
-                </div>
+    <div id="scada-app">
+        <header class="top-bar">
+            <div class="brand">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <div><h1>OT / ICS SECURITY MONITOR</h1><span>Industrial SCADA — Crude Distillation Unit</span></div>
             </div>
-            <div class="header-status">
-                <div class="status-indicator">
-                    <span class="dot" id="plc-status-dot"></span>
-                    <span id="plc-status-text">CONNECTING...</span>
+            <div class="top-right">
+                <div class="sis-status" id="sis-status">
+                    <span class="sis-dot"></span><span>SIS NORMAL</span>
                 </div>
-                <div class="time-display" id="time-display">00:00:00</div>
+                <span class="clock" id="clock">00:00:00</span>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="hmi-content">
-            <!-- PLC Physical Process View -->
-            <section class="process-view">
-                <h2>PROCESS OVERVIEW</h2>
-                <div class="sensor-grid">
-                    <!-- Temperature -->
-                    <div class="sensor-card">
-                        <div class="sensor-title">BOILER TEMPERATURE</div>
-                        <div class="sensor-value">
-                            <span id="val-temp">--</span>
-                            <span class="unit">°C</span>
-                        </div>
-                        <div class="threshold-info">
-                            ALARM LIMIT: <span id="thresh-temp">--</span> °C
-                        </div>
-                        <!-- Simple visual bar -->
-                        <div class="progress-bar">
-                            <div class="progress-fill temp-fill" id="bar-temp"></div>
-                        </div>
-                    </div>
+        <div class="stats-bar">
+            <div class="mini-stat"><span class="mini-val" id="stat-cmds">0</span><span class="mini-lbl">Commands</span></div>
+            <div class="mini-stat"><span class="mini-val" id="stat-alerts">0</span><span class="mini-lbl">Alerts</span></div>
+            <div class="mini-stat"><span class="mini-val" id="stat-blocked">0</span><span class="mini-lbl">Blocked</span></div>
+            <div class="mini-stat"><span class="mini-val" id="stat-unauth">0</span><span class="mini-lbl">Unauth</span></div>
+        </div>
 
-                    <!-- Pressure -->
-                    <div class="sensor-card">
-                        <div class="sensor-title">BOILER PRESSURE</div>
-                        <div class="sensor-value">
-                            <span id="val-pressure">--</span>
-                            <span class="unit">PSI</span>
-                        </div>
-                        <div class="threshold-info">
-                            ALARM LIMIT: <span id="thresh-pressure">--</span> PSI
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill pressure-fill" id="bar-pressure"></div>
-                        </div>
-                    </div>
+        <div class="main-layout">
+            <!-- Left: Process Units -->
+            <div class="process-column">
+                <section class="unit-panel" id="boiler-panel">
+                    <div class="unit-header"><h2>🔥 Boiler System</h2><span class="unit-status" id="boiler-status">NORMAL</span></div>
+                    <div class="gauges" id="boiler-gauges"></div>
+                </section>
+                <section class="unit-panel" id="pump-panel">
+                    <div class="unit-header"><h2>⚙ Pump Station</h2><span class="unit-status" id="pump-status">NORMAL</span></div>
+                    <div class="gauges" id="pump-gauges"></div>
+                </section>
+                <section class="unit-panel" id="cooling-panel">
+                    <div class="unit-header"><h2>❄ Cooling Tower</h2><span class="unit-status" id="cooling-status">NORMAL</span></div>
+                    <div class="gauges" id="cooling-gauges"></div>
+                </section>
+            </div>
 
-                    <!-- Valve Status -->
-                    <div class="sensor-card valve-card">
-                        <div class="sensor-title">EMERGENCY RELIEF VALVE</div>
-                        <div class="valve-visual" id="valve-visual">
-                            <div class="valve-icon">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                            </div>
-                        </div>
-                        <div class="valve-status-text" id="val-valve">STATUS: CLOSED</div>
-                    </div>
-                </div>
-
-                <!-- SCADA Network Topology snippet -->
-                <div class="network-diagram">
-                    <div class="node it-zone">Corp IT (Purdue L4)</div>
-                    <div class="link"></div>
-                    <div class="node idz-zone">OT Firewall</div>
-                    <div class="link"></div>
-                    <div class="node ot-zone">SCADA (Purdue L2)</div>
-                    <div class="link"></div>
-                    <div class="node plc-zone">PLC (Purdue L1)</div>
-                </div>
-            </section>
-
-            <!-- IDS / Alert View -->
-            <section class="security-view">
-                <div class="sec-header">
-                    <h2>OT SECURITY IDS ALERTS</h2>
-                    <div class="pulse"></div>
-                </div>
-                <div class="alerts-container" id="alerts-container">
-                    <div class="empty-alerts">Monitoring active. No anomalies detected.</div>
-                </div>
-                
-                <div class="attack-controls">
-                    <h3>Simulate Attack (For Demo Purposes)</h3>
-                    <p>Run the attacker script in a separate terminal to see how the system reacts to an ICS attack:</p>
-                    <code class="terminal-command">python attacks/register_manipulation.py --target 900</code>
-                </div>
-            </section>
-        </main>
+            <!-- Right: Security -->
+            <div class="security-column">
+                <section class="panel alert-panel">
+                    <div class="panel-head"><h2>🛡 Security Alerts</h2><span class="count-badge" id="alert-badge">0</span></div>
+                    <div class="alert-list" id="alert-container"><p class="empty-msg">No security alerts</p></div>
+                </section>
+                <section class="panel event-panel">
+                    <div class="panel-head"><h2>📋 Event Log</h2></div>
+                    <div class="event-list" id="event-container"><p class="empty-msg">Waiting for events...</p></div>
+                </section>
+            </div>
+        </div>
     </div>
     <script src="app.js"></script>
 </body>

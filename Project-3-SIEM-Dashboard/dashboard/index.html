@@ -3,61 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise SIEM Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Enterprise SIEM SOC Dashboard - Real-time security monitoring, threat correlation, and incident response">
+    <title>Enterprise SOC / SIEM Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="siem-grid">
-        <!-- Top Navbar -->
-        <header class="top-nav">
-            <div class="brand">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <h1>ENTERPRISE SOC / SIEM</h1>
+    <div id="siem-app">
+        <!-- ─── Top Navigation Bar ─── -->
+        <header class="top-nav" id="top-nav">
+            <div class="nav-left">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h1>ENTERPRISE SOC</h1>
+                        <span class="subtitle">Security Information & Event Management</span>
+                    </div>
+                </div>
             </div>
-            <div class="system-stats">
-                <span class="stat-badge"><span class="dot"></span> SYSTEM ONLINE</span>
-                <span class="stat-badge fw-badge">FIREWALL: ACTIVE</span>
-                <span class="stat-badge ad-badge">AD/LDAP: ACTIVE</span>
+            <div class="nav-center">
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="overview" id="tab-overview">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Overview
+                    </button>
+                    <button class="tab-btn" data-tab="alerts" id="tab-alerts">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Alerts
+                        <span class="badge" id="alert-badge">0</span>
+                    </button>
+                    <button class="tab-btn" data-tab="logs" id="tab-logs">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Log Explorer
+                    </button>
+                    <button class="tab-btn" data-tab="mitre" id="tab-mitre">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                        MITRE ATT&CK
+                    </button>
+                </nav>
+            </div>
+            <div class="nav-right">
+                <div class="system-indicators">
+                    <span class="indicator" id="sys-status">
+                        <span class="pulse-dot"></span>
+                        <span>SYSTEM ONLINE</span>
+                    </span>
+                    <span class="indicator" id="log-rate">
+                        <span class="rate-value" id="eps-counter">0</span>
+                        <span>EPS</span>
+                    </span>
+                    <span class="clock" id="system-clock">00:00:00</span>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Left Side: Incidents / Threat Map -->
-            <section class="incidents-panel">
-                <div class="panel-header">
-                    <h2><span class="highlight">]</span> CORRELATED THREAT INCIDENTS</h2>
-                </div>
-                <div class="incidents-list" id="incidents-container">
-                    <!-- Javascript populates this -->
-                    <div class="empty-state">Waiting for correlation engine events...</div>
-                </div>
-            </section>
+        <!-- ─── Main Content Area ─── -->
+        <main class="main-content">
 
-            <!-- Right Side: Raw Log Ingestion -->
-            <section class="logs-panel">
-                <div class="panel-header">
-                    <h2><span class="highlight">]</span> RAW LOG INGESTION (NORMALIZED)</h2>
+            <!-- ═══ OVERVIEW TAB ═══ -->
+            <div class="tab-content active" id="content-overview">
+                <!-- Stats Row -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon critical-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        </div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="stat-critical">0</span>
+                            <span class="stat-label">Critical Alerts</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="stat-high">0</span>
+                            <span class="stat-label">High Alerts</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon info-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="stat-total-logs">0</span>
+                            <span class="stat-label">Total Logs</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success-bg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div class="stat-data">
+                            <span class="stat-value" id="stat-sources">5</span>
+                            <span class="stat-label">Active Sources</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="table-wrapper">
-                    <table class="logs-table">
-                        <thead>
-                            <tr>
-                                <th>TIME</th>
-                                <th>SOURCE</th>
-                                <th>TYPE</th>
-                                <th>SRC IP</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logs-body">
-                            <!-- Javascript populates this -->
-                        </tbody>
-                    </table>
+
+                <!-- Incidents + Logs Grid -->
+                <div class="overview-grid">
+                    <!-- Left: Correlated Incidents -->
+                    <section class="panel incidents-panel">
+                        <div class="panel-header">
+                            <h2>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                Correlated Threat Incidents
+                            </h2>
+                            <span class="panel-badge" id="incident-count">0</span>
+                        </div>
+                        <div class="incidents-list" id="incidents-container">
+                            <div class="empty-state">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <p>Monitoring active. Correlation engine processing events...</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Right: Live Log Feed -->
+                    <section class="panel logs-panel">
+                        <div class="panel-header">
+                            <h2>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Live Log Ingestion
+                            </h2>
+                            <div class="source-filters">
+                                <button class="filter-btn active" data-source="all">All</button>
+                                <button class="filter-btn" data-source="firewall">FW</button>
+                                <button class="filter-btn" data-source="active_directory">AD</button>
+                                <button class="filter-btn" data-source="web_server">Web</button>
+                                <button class="filter-btn" data-source="dns">DNS</button>
+                                <button class="filter-btn" data-source="vpn">VPN</button>
+                            </div>
+                        </div>
+                        <div class="log-table-wrapper">
+                            <table class="log-table">
+                                <thead>
+                                    <tr>
+                                        <th>TIME</th>
+                                        <th>SOURCE</th>
+                                        <th>EVENT TYPE</th>
+                                        <th>SRC IP</th>
+                                        <th>ACTION</th>
+                                        <th>SEV</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="log-body"></tbody>
+                            </table>
+                        </div>
+                    </section>
                 </div>
-            </section>
-        </div>
+            </div>
+
+            <!-- ═══ ALERTS TAB ═══ -->
+            <div class="tab-content" id="content-alerts">
+                <div class="alerts-header">
+                    <h2>Security Alert Management</h2>
+                    <div class="alert-filters">
+                        <button class="severity-filter active" data-severity="all">All</button>
+                        <button class="severity-filter" data-severity="Critical">Critical</button>
+                        <button class="severity-filter" data-severity="High">High</button>
+                        <button class="severity-filter" data-severity="Medium">Medium</button>
+                    </div>
+                </div>
+                <div class="alerts-grid" id="alerts-detail-container">
+                    <div class="empty-state">
+                        <p>No alerts to display. The system is monitoring for threats.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ LOG EXPLORER TAB ═══ -->
+            <div class="tab-content" id="content-logs">
+                <div class="search-bar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="log-search-input" placeholder="Search logs (IP, username, event type, description...)">
+                    <select id="log-source-filter">
+                        <option value="">All Sources</option>
+                        <option value="firewall">Firewall</option>
+                        <option value="active_directory">Active Directory</option>
+                        <option value="web_server">Web Server</option>
+                        <option value="dns">DNS</option>
+                        <option value="vpn">VPN</option>
+                    </select>
+                    <button class="search-btn" id="search-btn">Search</button>
+                </div>
+                <div class="search-results" id="search-results">
+                    <div class="empty-state">
+                        <p>Enter a search query to explore historical logs.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MITRE ATT&CK TAB ═══ -->
+            <div class="tab-content" id="content-mitre">
+                <div class="mitre-header">
+                    <h2>MITRE ATT&CK Detection Coverage</h2>
+                    <p class="mitre-desc">Detected attack techniques mapped to the MITRE ATT&CK framework</p>
+                </div>
+                <div class="mitre-grid" id="mitre-grid">
+                    <div class="empty-state">
+                        <p>No attack techniques detected yet. The correlation engine is analyzing incoming events.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
     <script src="app.js"></script>
 </body>
