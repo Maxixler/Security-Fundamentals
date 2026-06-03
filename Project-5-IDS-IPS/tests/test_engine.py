@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from engine.signature_matcher import SignatureMatcher
+from engine.signature_matcher import SignatureEngine
 
 def test_signature_matcher():
     matcher = SignatureMatcher()
