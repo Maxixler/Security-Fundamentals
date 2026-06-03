@@ -1,4 +1,5 @@
 import sys, os
+import asyncio
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from siem.application import ApplicationState
@@ -129,15 +130,18 @@ def test_application_state_ml_training_buffer():
     }
 
     # This should not trigger retraining (not enough samples)
+    # Run the async method
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     initial_buffer_size = len(app_state._ml_training_buffer)
-    app_state.add_event_for_ml_training(event_dict)
+    loop.run_until_complete(app_state.add_event_for_ml_training(event_dict))
     assert len(app_state._ml_training_buffer) == initial_buffer_size + 1
 
     # Add many events to test retraining logic (would need to mock time)
     # We'll just verify the buffer works
     for i in range(10):
         event_dict["event_id"] = f"test-event-{i}"
-        app_state.add_event_for_ml_training(event_dict)
+        loop.run_until_complete(app_state.add_event_for_ml_training(event_dict))
 
     assert len(app_state._ml_training_buffer) > 10
 

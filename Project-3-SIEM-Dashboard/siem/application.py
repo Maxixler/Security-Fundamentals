@@ -119,7 +119,7 @@ class ApplicationState:
 
     # ─── ML Training ────────────────────────────────────────────────
 
-    def add_event_for_ml_training(self, event_dict: Dict[str, Any]) -> None:
+    async def add_event_for_ml_training(self, event_dict: Dict[str, Any]) -> None:
         """Add event to ML training buffer and potentially retrain."""
         self._ml_training_buffer.append(event_dict)
 
@@ -127,9 +127,9 @@ class ApplicationState:
         current_time = time.time()
         if (len(self._ml_training_buffer) >= self._ml_min_samples and
                 (current_time - self._ml_last_train_time) > self._ml_retrain_interval):
-            self._retrain_ml_models()
+            await self._retrain_ml_models()
 
-    def _retrain_ml_models(self) -> None:
+    async def _retrain_ml_models(self) -> None:
         """Retrain ML models with buffered events."""
         if len(self._ml_training_buffer) < self._ml_min_samples:
             return

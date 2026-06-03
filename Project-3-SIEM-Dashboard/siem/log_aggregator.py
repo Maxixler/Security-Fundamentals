@@ -165,7 +165,7 @@ class LogAggregator:
 
     # ─── Public API ─────────────────────────────────────────────────────
 
-    def ingest_log(self, log_type: str, raw_data: str) -> Optional[NormalizedEvent]:
+    async def ingest_log(self, log_type: str, raw_data: str) -> Optional[NormalizedEvent]:
         """
         Entry point for incoming raw logs.
 

@@ -29,12 +29,14 @@ import os
 import threading
 import time
 import random
-from typing import Callable, Tuple, Optional, Dict, Any
+import asyncio
+from typing import Callable, Tuple, Optional, Dict, Any, Awaitable
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
+from flasgger import Swagger, swag_from
 
 from siem.application import get_application_state
 from siem.log_aggregator import LogAggregator, NormalizedEvent
@@ -87,7 +89,7 @@ _DOMAINS = [
 ]
 
 
-def _generate_firewall_log() -> tuple:
+async def _generate_firewall_log() -> tuple:
     """Generate a simulated firewall log entry."""
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     scenario = random.random()
@@ -115,7 +117,7 @@ def _generate_firewall_log() -> tuple:
     return "firewall", raw
 
 
-def _generate_ad_log() -> tuple:
+async def _generate_ad_log() -> tuple:
     """Generate a simulated Active Directory event log."""
     ts = time.strftime("%Y-%m-%dT%H:%M:%S")
     scenario = random.random()
@@ -152,7 +154,7 @@ def _generate_ad_log() -> tuple:
     return "active_directory", raw
 
 
-def _generate_web_log() -> tuple:
+async def _generate_web_log() -> tuple:
     """Generate a simulated web server log entry."""
     ts = time.strftime("%d/%b/%Y:%H:%M:%S +0000")
     scenario = random.random()
@@ -183,7 +185,7 @@ def _generate_web_log() -> tuple:
     return "web_server", raw
 
 
-def _generate_dns_log() -> tuple:
+async def _generate_dns_log() -> tuple:
     """Generate a simulated DNS query log."""
     ts = time.strftime("%Y-%m-%dT%H:%M:%S")
     ip = random.choice(_INTERNAL_IPS + _EXTERNAL_IPS[4:])
@@ -194,7 +196,7 @@ def _generate_dns_log() -> tuple:
     return "dns", raw
 
 
-def _generate_vpn_log() -> tuple:
+async def _generate_vpn_log() -> tuple:
     """Generate a simulated VPN authentication log."""
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     scenario = random.random()
@@ -225,7 +227,7 @@ _LOG_GENERATORS = [
 ]
 
 
-def _pick_generator():
+def _pick_generator() -> Callable[[], Awaitable[Tuple[str, str]]]:
     """Weighted random selection of log generator."""
     choices = []
     for gen, weight in _LOG_GENERATORS:
@@ -233,9 +235,9 @@ def _pick_generator():
     return random.choice(choices)
 
 
-def run_simulation() -> None:
+async def run_simulation() -> None:
     """
-    Background thread that continuously generates simulated enterprise logs,
+    Background task that continuously generates simulated enterprise logs,
     feeds them through the aggregator → correlator → anomaly detector pipeline,
     and populates the alert/log buffers for the dashboard.
     """
@@ -244,7 +246,7 @@ def run_simulation() -> None:
 
     while app_state.is_simulation_running():
         # Random delay to simulate realistic log arrival patterns
-        time.sleep(random.uniform(0.3, 2.0))
+        await asyncio.sleep(random.uniform(0.3, 2.0))
 
         # Occasionally generate bursts (simulate attacks)
         burst_count: int = 1
@@ -252,13 +254,13 @@ def run_simulation() -> None:
             burst_count = random.randint(3, 8)  # Attack burst
 
         for _ in range(burst_count):
-            generator: Callable[[], Tuple[str, str]] = _pick_generator()
+            generator: Callable[[], Awaitable[Tuple[str, str]]] = _pick_generator()
             log_type: str
             raw_log: str
-            log_type, raw_log = generator()
+            log_type, raw_log = await generator()
 
-            # Step 1: Ingest & normalize
-            event: Optional[NormalizedEvent] = app_state.aggregator.ingest_log(log_type, raw_log)
+            # Step 1: Ingest & normalize (now async)
+            event: Optional[NormalizedEvent] = await app_state.aggregator.ingest_log(log_type, raw_log)
             if not event:
                 continue
 
@@ -282,7 +284,7 @@ def run_simulation() -> None:
                     print(f"  [ML] High confidence anomaly detected: {ml_confidence:.2f}")
 
             # Add event to ML training buffer for continuous learning
-            app_state.add_event_for_ml_training(event_dict)
+            asyncio.create_task(app_state.add_event_for_ml_training(event_dict))
 
             # Step 3: Correlation
             incident: Optional[Incident] = app_state.correlator.analyze(event)
@@ -294,6 +296,7 @@ def run_simulation() -> None:
 # ─── Flask Web Application ─────────────────────────────────────────────
 app = Flask(__name__, static_folder="dashboard")
 CORS(app)
+swagger = Swagger(app)
 
 
 @app.route("/")
@@ -307,6 +310,76 @@ def serve_static(filename):
 
 
 @app.route("/api/status")
+@swag_from({
+    'responses': {
+        200: {
+            'description': 'Current system status including alerts, logs, and statistics',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'alerts': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {'type': 'string'},
+                                'timestamp': {'type': 'string'},
+                                'severity': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'attack_type': {'type': 'string'},
+                                'src_ip': {'type': 'string'},
+                                'target': {'type': 'string'},
+                                'source': {'type': 'string'},
+                                'country': {'type': 'string'},
+                                'mitre': {'type': 'object'},
+                                'status': {'type': 'string'},
+                                'event_count': {'type': 'integer'}
+                            }
+                        }
+                    },
+                    'recent_logs': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'event_id': {'type': 'string'},
+                                'timestamp': {'type': 'string'},
+                                'source_type': {'type': 'string'},
+                                'event_type': {'type': 'string'},
+                                'severity': {'type': 'integer'},
+                                'src_ip': {'type': 'string'},
+                                'dst_ip': {'type': 'string'},
+                                'src_port': {'type': 'integer'},
+                                'dst_port': {'type': 'integer'},
+                                'protocol': {'type': 'string'},
+                                'action': {'type': 'string'},
+                                'username': {'type': 'string'},
+                                'hostname': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'raw_log': {'type': 'string'},
+                                'metadata': {'type': 'object'}
+                            }
+                        }
+                    },
+                    'stats': {
+                        'type': 'object',
+                        'properties': {
+                            'uptime_seconds': {'type': 'number'},
+                            'events_processed': {'type': 'integer'},
+                            'alert_count': {'type': 'integer'},
+                            'log_count': {'type': 'integer'},
+                            'simulation_running': {'type': 'boolean'},
+                            'ingestion_stats': {'type': 'object'},
+                            'anomaly_baselines': {'type': 'object'},
+                            'threat_intel_stats': {'type': 'object'},
+                            'ml_anomaly_detector': {'type': 'object'}
+                        }
+                    }
+                }
+            }
+        }
+    }
+})
 def get_status():
     """Main polling endpoint for the dashboard."""
     return jsonify({
@@ -317,6 +390,48 @@ def get_status():
 
 
 @app.route("/api/alerts")
+@swag_from({
+    'parameters': [
+        {
+            'name': 'severity',
+            'in': 'query',
+            'type': 'string',
+            'enum': ['critical', 'high', 'medium', 'low', 'info'],
+            'description': 'Filter alerts by severity level (case-insensitive)'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'List of alerts with optional severity filter',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'alerts': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'id': {'type': 'string'},
+                                'timestamp': {'type': 'string'},
+                                'severity': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'attack_type': {'type': 'string'},
+                                'src_ip': {'type': 'string'},
+                                'target': {'type': 'string'},
+                                'source': {'type': 'string'},
+                                'country': {'type': 'string'},
+                                'mitre': {'type': 'object'},
+                                'status': {'type': 'string'},
+                                'event_count': {'type': 'integer'}
+                            }
+                        }
+                    },
+                    'total': {'type': 'integer'}
+                }
+            }
+        }
+    }
+})
 def get_alerts():
     """Get all alerts with optional severity filter."""
     severity = request.args.get("severity", "").lower()
@@ -325,6 +440,57 @@ def get_alerts():
 
 
 @app.route("/api/logs")
+@swag_from({
+    'parameters': [
+        {
+            'name': 'source',
+            'in': 'query',
+            'type': 'string',
+            'description': 'Filter logs by source type (e.g., firewall, active_directory, web_server)'
+        },
+        {
+            'name': 'count',
+            'in': 'query',
+            'type': 'integer',
+            'description': 'Number of logs to return (max 100)'
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'List of recent logs with optional source filter',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'logs': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'event_id': {'type': 'string'},
+                                'timestamp': {'type': 'string'},
+                                'source_type': {'type': 'string'},
+                                'event_type': {'type': 'string'},
+                                'severity': {'type': 'integer'},
+                                'src_ip': {'type': 'string'},
+                                'dst_ip': {'type': 'string'},
+                                'src_port': {'type': 'integer'},
+                                'dst_port': {'type': 'integer'},
+                                'protocol': {'type': 'string'},
+                                'action': {'type': 'string'},
+                                'username': {'type': 'string'},
+                                'hostname': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'raw_log': {'type': 'string'},
+                                'metadata': {'type': 'object'}
+                            }
+                        }
+                    },
+                    'total': {'type': 'integer'}
+                }
+            }
+        }
+    }
+})
 def get_logs():
     """Get recent logs with optional source filter."""
     source = request.args.get("source", "")
@@ -334,6 +500,67 @@ def get_logs():
 
 
 @app.route("/api/search", methods=["POST"])
+@swag_from({
+    'parameters': [
+        {
+            'name': 'body',
+            'in': 'body',
+            'required': True,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'query': {
+                        'type': 'string',
+                        'description': 'Text to search for in logs (case-insensitive)'
+                    },
+                    'source': {
+                        'type': 'string',
+                        'description': 'Filter by source type (e.g., firewall, active_directory)'
+                    },
+                    'severity_min': {
+                        'type': 'integer',
+                        'description': 'Minimum severity level (0-10)'
+                    }
+                }
+            }
+        }
+    ],
+    'responses': {
+        200: {
+            'description': 'Search results',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'results': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'event_id': {'type': 'string'},
+                                'timestamp': {'type': 'string'},
+                                'source_type': {'type': 'string'},
+                                'event_type': {'type': 'string'},
+                                'severity': {'type': 'integer'},
+                                'src_ip': {'type': 'string'},
+                                'dst_ip': {'type': 'string'},
+                                'src_port': {'type': 'integer'},
+                                'dst_port': {'type': 'integer'},
+                                'protocol': {'type': 'string'},
+                                'action': {'type': 'string'},
+                                'username': {'type': 'string'},
+                                'hostname': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'raw_log': {'type': 'string'},
+                                'metadata': {'type': 'object'}
+                            }
+                        }
+                    },
+                    'total': {'type': 'integer'}
+                }
+            }
+        }
+    }
+})
 def search_logs():
     """Full-text search across historical logs."""
     data = request.json or {}
@@ -341,8 +568,10 @@ def search_logs():
     source_filter = data.get("source", "")
     severity_min = data.get("severity_min", 0)
 
+    # Get all logs from the buffer (limit set to buffer size)
+    logs = app_state.get_logs(limit=1000)  # Buffer size is 100, so 1000 is safe
     results = []
-    for log in historical_logs:
+    for log in logs:
         # Source filter
         if source_filter and log.get("source_type") != source_filter:
             continue
@@ -360,6 +589,30 @@ def search_logs():
 
 
 @app.route("/api/mitre")
+@swag_from({
+    'responses': {
+        200: {
+            'description': 'MITRE ATT&CK mapping from detected incidents',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'mapping': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': {
+                                'technique': {'type': 'string'},
+                                'tactic': {'type': 'string'},
+                                'description': {'type': 'string'},
+                                'count': {'type': 'integer'}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+})
 def get_mitre_map():
     """Get MITRE ATT&CK mapping from detected incidents."""
     from siem.correlation_engine import MITRE_MAPPING
@@ -390,10 +643,12 @@ def interactive_mode():
     print("  [*] Enterprise SIEM System — Interactive Mode")
     print("  [*] Log simulation running in background\n")
 
-    # Start simulation thread
-    sim_thread = threading.Thread(target=run_simulation, daemon=True)
-    sim_thread.start()
+    # Start simulation task
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    sim_task = loop.create_task(run_simulation())
 
+    # Give simulation a moment to start
     time.sleep(1)  # Let simulation warm up
 
     while True:
@@ -428,6 +683,7 @@ def interactive_mode():
             _start_web_dashboard()
         elif choice == "8":
             print("\n  [*] Shutting down SIEM system. Stay vigilant! 🛡️")
+            sim_task.cancel()
             sys.exit(0)
         else:
             print("  [!] Invalid option. Try again.")
@@ -530,19 +786,17 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Always start the simulation thread
-    sim_thread = threading.Thread(target=run_simulation, daemon=True)
-    sim_thread.start()
-
     if args.web:
         banner()
         _start_web_dashboard(args.port)
     elif args.simulate:
         banner()
         print("  [*] Running log simulator in terminal mode. Press Ctrl+C to stop.\n")
+        # Run the async simulation in a thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         try:
-            while True:
-                time.sleep(1)
+            loop.run_until_complete(run_simulation())
         except KeyboardInterrupt:
             print("\n  [*] Simulation stopped.")
     else:

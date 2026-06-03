@@ -112,10 +112,10 @@ _MALICIOUS_IPS: Dict[str, Dict[str, Any]] = {
 
 # ─── GeoIP Simulation Database ──────────────────────────────────────────
 _GEOIP_DB: Dict[str, Dict[str, str]] = {
-    "8.8.8.8":       {"country": "US", "region": "California", "isp": "Google LLC"},
-    "1.1.1.1":       {"country": "US", "region": "California", "isp": "Cloudflare Inc."},
-    "10.0.0.5":      {"country": "LOCAL", "region": "Internal", "isp": "Corporate LAN"},
-    "10.0.0.50":     {"country": "LOCAL", "region": "Internal", "isp": "Corporate LAN"},
+    "8.8.8.8": {"country": "US", "region": "California", "isp": "Google LLC"},
+    "1.1.1.1": {"country": "US", "region": "California", "isp": "Cloudflare Inc."},
+    "10.0.0.5": {"country": "LOCAL", "region": "Internal", "isp": "Corporate LAN"},
+    "10.0.0.50": {"country": "LOCAL", "region": "Internal", "isp": "Corporate LAN"},
     "192.168.1.100": {"country": "LOCAL", "region": "Internal", "isp": "Corporate LAN"},
     "192.168.1.150": {"country": "LOCAL", "region": "Internal", "isp": "Corporate OT"},
 }
@@ -184,7 +184,10 @@ class ThreatIntelFeed:
             }
         else:
             # Clean IP — still enrich with GeoIP
-            geo: Dict[str, str] = _GEOIP_DB.get(ip_address, {"country": "UNKNOWN", "region": "Unknown", "isp": "Unknown"})
+            geo: Dict[str, str] = _GEOIP_DB.get(
+                ip_address,
+                {"country": "UNKNOWN", "region": "Unknown", "isp": "Unknown"},
+            )
             result: Dict[str, Any] = {
                 "safe": True,
                 "threat_score": 0,
@@ -216,9 +219,21 @@ class ThreatIntelFeed:
         # Simulated malicious domains
         malicious_domains: Dict[str, Dict[str, Any]] = {
             "evil-c2.tk": {"threat_score": 95, "type": "c2_domain", "actor": "APT28"},
-            "phishing-bank.ml": {"threat_score": 90, "type": "phishing", "actor": "Unknown"},
-            "crypto-miner.xyz": {"threat_score": 80, "type": "cryptojacking", "actor": "Unknown"},
-            "data-exfil.top": {"threat_score": 85, "type": "exfiltration", "actor": "Unknown"},
+            "phishing-bank.ml": {
+                "threat_score": 90,
+                "type": "phishing",
+                "actor": "Unknown",
+            },
+            "crypto-miner.xyz": {
+                "threat_score": 80,
+                "type": "cryptojacking",
+                "actor": "Unknown",
+            },
+            "data-exfil.top": {
+                "threat_score": 85,
+                "type": "exfiltration",
+                "actor": "Unknown",
+            },
         }
 
         for mal_domain, data in malicious_domains.items():
@@ -226,7 +241,15 @@ class ThreatIntelFeed:
                 return {"safe": False, **data}
 
         # Check for suspicious TLDs
-        suspicious_tlds: List[str] = [".tk", ".ml", ".cf", ".xyz", ".top", ".buzz", ".pw"]
+        suspicious_tlds: List[str] = [
+            ".tk",
+            ".ml",
+            ".cf",
+            ".xyz",
+            ".top",
+            ".buzz",
+            ".pw",
+        ]
         for tld in suspicious_tlds:
             if domain.endswith(tld):
                 return {
@@ -256,7 +279,9 @@ if __name__ == "__main__":
     for ip in test_ips:
         result = ti.check_ip(ip)
         status = "🔴 MALICIOUS" if not result["safe"] else "🟢 CLEAN"
-        print(f"  {ip:20s} → {status} | Score: {result['threat_score']:3d} | "
-              f"Country: {result['country']:5s} | Type: {result['threat_type']}")
+        print(
+            f"  {ip:20s} → {status} | Score: {result['threat_score']:3d} | "
+            f"Country: {result['country']:5s} | Type: {result['threat_type']}"
+        )
 
     print(f"\n  Stats: {ti.get_stats()}")
