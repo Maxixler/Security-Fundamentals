@@ -24,6 +24,7 @@ import os
 import threading
 import time
 import random
+from typing import List, Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -31,19 +32,21 @@ from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 
 from engine.packet_sniffer import TrafficGenerator, Packet
-from engine.signature_matcher import SignatureEngine
+from engine.signature_matcher import SignatureEngine, DetectionResult
 
 
 # ─── Application State ─────────────────────────────────────────────────
-traffic_gen = TrafficGenerator(attack_ratio=0.15)
-ids_engine = SignatureEngine()
+traffic_gen: TrafficGenerator = TrafficGenerator(attack_ratio=0.15)
+ids_engine: SignatureEngine = SignatureEngine()
+ml_detector: MLAnomalyDetector = MLAnomalyDetector()
+stats_detector: StatisticalAnomalyDetector = StatisticalAnomalyDetector()
 
-packet_log = []
-alert_log = []
-MAX_PACKETS = 80
-MAX_ALERTS = 60
+packet_log: List[Dict[str, Any]] = []
+alert_log: List[Dict[str, Any]] = []
+MAX_PACKETS: int = 80
+MAX_ALERTS: int = 60
 
-simulation_running = False
+simulation_running: bool = False
 
 
 def banner():

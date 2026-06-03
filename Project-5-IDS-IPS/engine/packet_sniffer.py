@@ -74,7 +74,7 @@ class Packet:
         "ttl", "metadata",
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         self.packet_id: str = kwargs.get("packet_id", self._gen_id())
         self.timestamp: str = kwargs.get("timestamp", datetime.now().isoformat())
         self.protocol: str = kwargs.get("protocol", "TCP")
@@ -93,7 +93,7 @@ class Packet:
         raw = f"{time.time()}-{random.random()}".encode()
         return hashlib.md5(raw).hexdigest()[:12]
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "packet_id": self.packet_id,
             "timestamp": self.timestamp,
@@ -124,10 +124,10 @@ class TrafficGenerator:
     Attributes:
         attack_ratio: Probability of generating an attack packet (0.0-1.0)
         packets_generated: Total count of packets generated
-    """
+   """
 
-    def __init__(self, attack_ratio: float = 0.15):
-        self.attack_ratio = attack_ratio
+    def __init__(self, attack_ratio: float = 0.15) -> None:
+        self.attack_ratio: float = attack_ratio
         self.packets_generated: int = 0
 
     def generate_packet(self) -> Packet:

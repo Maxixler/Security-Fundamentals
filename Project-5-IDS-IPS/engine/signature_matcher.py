@@ -20,6 +20,7 @@ import time
 import math
 from collections import defaultdict, deque
 from typing import Dict, List, Optional, Any, Tuple
+from datetime import datetime
 
 
 # ─── Detection Signatures ──────────────────────────────────────────────
@@ -198,9 +199,9 @@ class SignatureEngine:
     BRUTE_FORCE_THRESHOLD = 5      # Auth attempts per IP per window
     BRUTE_FORCE_WINDOW = 60        # Seconds
 
-    def __init__(self):
-        self.rules = _SIGNATURES
-        self.compiled_rules = self._compile_rules()
+    def __init__(self) -> None:
+        self.rules: List[Dict[str, Any]] = _SIGNATURES
+        self.compiled_rules: List[Tuple[Dict[str, Any], re.Pattern]] = self._compile_rules()
         self.alerts: List[Dict[str, Any]] = []
         self.blocked_ips: Dict[str, Dict[str, Any]] = {}  # IP → {reason, time, ttl}
 
@@ -210,7 +211,7 @@ class SignatureEngine:
         self._auth_tracker: Dict[str, deque] = defaultdict(deque)
 
         # Statistics
-        self.stats = {
+        self.stats: Dict[str, int] = {
             "packets_analyzed": 0,
             "alerts_generated": 0,
             "signature_matches": 0,
@@ -218,9 +219,9 @@ class SignatureEngine:
             "packets_dropped": 0,
         }
 
-    def _compile_rules(self) -> List[Tuple[Dict, re.Pattern]]:
+    def _compile_rules(self) -> List[Tuple[Dict[str, Any], re.Pattern]]:
         """Pre-compile regex patterns for performance."""
-        compiled = []
+        compiled: List[Tuple[Dict[str, Any], re.Pattern]] = []
         for rule in self.rules:
             try:
                 pattern = re.compile(rule["pattern"], re.IGNORECASE)
@@ -229,21 +230,21 @@ class SignatureEngine:
                 pass
         return compiled
 
-    def analyze_packet(self, packet) -> DetectionResult:
+    def analyze_packet(self, packet: Any) -> DetectionResult:
         """
         Analyze a single packet through all detection layers.
 
         Returns DetectionResult with match status and recommended action.
         """
-        pkt = packet.to_dict() if hasattr(packet, "to_dict") else packet
+        pkt: Dict[str, Any] = packet.to_dict() if hasattr(packet, "to_dict") else packet
         self.stats["packets_analyzed"] += 1
 
-        src_ip = pkt.get("src_ip", "")
-        now = time.time()
+        src_ip: str = pkt.get("src_ip", "")
+        now: float = time.time()
 
         # Check if source IP is blocked
         if src_ip in self.blocked_ips:
-            block_info = self.blocked_ips[src_ip]
+            block_info: Dict[str, Any] = self.blocked_ips[src_ip]
             if now < block_info.get("expires", 0):
                 self.stats["packets_dropped"] += 1
                 return DetectionResult(
@@ -257,7 +258,7 @@ class SignatureEngine:
                 del self.blocked_ips[src_ip]
 
         # Layer 1: Signature matching
-        result = self._check_signatures(pkt)
+        result: Optional[DetectionResult] = self._check_signatures(pkt)
         if result and result.matched:
             self._record_alert(result, pkt)
             return result
@@ -273,11 +274,11 @@ class SignatureEngine:
             matched=False, action="pass",
         )
 
-    def _check_signatures(self, pkt: dict) -> Optional[DetectionResult]:
+    def _check_signatures(self, pkt: Dict[str, Any]) -> Optional[DetectionResult]:
         """Check packet against all compiled signature rules."""
-        payload = pkt.get("payload", "")
-        protocol = pkt.get("protocol", "")
-        dst_port = pkt.get("dst_port", 0)
+        payload: str = pkt.get("payload", "")
+        protocol: str = pkt.get("protocol", "")
+        dst_port: int = pkt.get("dst_port", 0)
 
         for rule, pattern in self.compiled_rules:
             # Protocol filter
@@ -302,14 +303,14 @@ class SignatureEngine:
                 )
         return None
 
-    def _check_rates(self, pkt: dict, src_ip: str, now: float) -> Optional[DetectionResult]:
+    def _check_rates(self, pkt: Dict[str, Any], src_ip: str, now: float) -> Optional[DetectionResult]:
         """Rate-based anomaly detection."""
         if not src_ip:
             return None
 
-        flags = pkt.get("flags", "")
-        protocol = pkt.get("protocol", "")
-        dst_port = pkt.get("dst_port", 0)
+        flags: str = pkt.get("flags", "")
+        protocol: str = pkt.get("protocol", "")
+        dst_port: int = pkt.get("dst_port", 0)
 
         # SYN Flood Detection
         if flags == "SYN":
@@ -338,7 +339,7 @@ class SignatureEngine:
             while self._port_tracker[src_ip] and (now - self._port_tracker[src_ip][0][0]) > self.PORT_SCAN_WINDOW:
                 self._port_tracker[src_ip].popleft()
 
-            unique_ports = len(set(p[1] for p in self._port_tracker[src_ip]))
+            unique_ports: int = len(set(p[1] for p in self._port_tracker[src_ip]))
             if unique_ports >= self.PORT_SCAN_THRESHOLD:
                 self.stats["rate_alerts"] += 1
                 self._port_tracker[src_ip].clear()
