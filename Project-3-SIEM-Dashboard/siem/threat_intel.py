@@ -17,7 +17,7 @@ Architecture:
     IP Address → Feed Lookup → Score Aggregation → Enrichment Response
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 
 
@@ -133,7 +133,7 @@ class ThreatIntelFeed:
         cache_hits: Number of lookups resolved from cache
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.lookup_count: int = 0
         self.cache_hits: int = 0
         self._cache: Dict[str, Dict[str, Any]] = {}
@@ -168,8 +168,8 @@ class ThreatIntelFeed:
 
         # Check malicious IP database
         if ip_address in _MALICIOUS_IPS:
-            data = _MALICIOUS_IPS[ip_address]
-            result = {
+            data: Dict[str, Any] = _MALICIOUS_IPS[ip_address]
+            result: Dict[str, Any] = {
                 "safe": False,
                 "threat_score": data["threat_score"],
                 "threat_type": data["threat_type"],
@@ -184,8 +184,8 @@ class ThreatIntelFeed:
             }
         else:
             # Clean IP — still enrich with GeoIP
-            geo = _GEOIP_DB.get(ip_address, {"country": "UNKNOWN", "region": "Unknown", "isp": "Unknown"})
-            result = {
+            geo: Dict[str, str] = _GEOIP_DB.get(ip_address, {"country": "UNKNOWN", "region": "Unknown", "isp": "Unknown"})
+            result: Dict[str, Any] = {
                 "safe": True,
                 "threat_score": 0,
                 "threat_type": "clean",
@@ -214,7 +214,7 @@ class ThreatIntelFeed:
             Dict with domain reputation data
         """
         # Simulated malicious domains
-        malicious_domains = {
+        malicious_domains: Dict[str, Dict[str, Any]] = {
             "evil-c2.tk": {"threat_score": 95, "type": "c2_domain", "actor": "APT28"},
             "phishing-bank.ml": {"threat_score": 90, "type": "phishing", "actor": "Unknown"},
             "crypto-miner.xyz": {"threat_score": 80, "type": "cryptojacking", "actor": "Unknown"},
@@ -226,7 +226,7 @@ class ThreatIntelFeed:
                 return {"safe": False, **data}
 
         # Check for suspicious TLDs
-        suspicious_tlds = [".tk", ".ml", ".cf", ".xyz", ".top", ".buzz", ".pw"]
+        suspicious_tlds: List[str] = [".tk", ".ml", ".cf", ".xyz", ".top", ".buzz", ".pw"]
         for tld in suspicious_tlds:
             if domain.endswith(tld):
                 return {

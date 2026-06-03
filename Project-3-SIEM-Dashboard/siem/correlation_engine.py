@@ -18,7 +18,7 @@ Architecture:
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple, Deque
 
 from .threat_intel import ThreatIntelFeed
 
@@ -49,17 +49,17 @@ class Incident:
                  src_ip: str = "", target: str = "", source: str = "",
                  country: str = "UNKNOWN", events: Optional[List[dict]] = None):
         self.id = f"INC-{int(time.time() * 1000) % 1000000:06d}"
-        self.timestamp = datetime.now().isoformat()
-        self.severity = severity       # Critical, High, Medium, Low
-        self.description = description
-        self.attack_type = attack_type
-        self.src_ip = src_ip
-        self.target = target
-        self.source = source
-        self.country = country
-        self.mitre = MITRE_MAPPING.get(attack_type, {})
-        self.status = "new"            # new, investigating, resolved
-        self.related_events = events or []
+        self.timestamp: str = datetime.now().isoformat()
+        self.severity: str = severity       # Critical, High, Medium, Low
+        self.description: str = description
+        self.attack_type: str = attack_type
+        self.src_ip: str = src_ip
+        self.target: str = target
+        self.source: str = source
+        self.country: str = country
+        self.mitre: Dict[str, str] = MITRE_MAPPING.get(attack_type, {})
+        self.status: str = "new"            # new, investigating, resolved
+        self.related_events: List[dict] = events or []
 
     def to_dict(self) -> dict:
         return {
@@ -95,37 +95,37 @@ class CorrelationEngine:
     """
 
     # Configurable detection thresholds
-    BRUTE_FORCE_THRESHOLD = 5       # Failed logins to trigger alert
-    BRUTE_FORCE_WINDOW = 120        # Seconds
-    PORT_SCAN_THRESHOLD = 8         # Blocked connections to trigger
-    PORT_SCAN_WINDOW = 60           # Seconds
-    VPN_FAIL_THRESHOLD = 3          # VPN auth failures
-    VPN_FAIL_WINDOW = 300           # Seconds
-    WEB_ATTACK_THRESHOLD = 3        # Web attack attempts
-    WEB_ATTACK_WINDOW = 60          # Seconds
+    BRUTE_FORCE_THRESHOLD: int = 5       # Failed logins to trigger alert
+    BRUTE_FORCE_WINDOW: int = 120        # Seconds
+    PORT_SCAN_THRESHOLD: int = 8         # Blocked connections to trigger
+    PORT_SCAN_WINDOW: int = 60           # Seconds
+    VPN_FAIL_THRESHOLD: int = 3          # VPN auth failures
+    VPN_FAIL_WINDOW: int = 300           # Seconds
+    WEB_ATTACK_THRESHOLD: int = 3        # Web attack attempts
+    WEB_ATTACK_WINDOW: int = 60          # Seconds
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ti_feed = ThreatIntelFeed()
         self.incidents: List[Incident] = []
 
         # Per-IP sliding window trackers
-        self._failed_logins: Dict[str, deque] = defaultdict(deque)
-        self._firewall_denies: Dict[str, deque] = defaultdict(deque)
-        self._vpn_fails: Dict[str, deque] = defaultdict(deque)
-        self._web_attacks: Dict[str, deque] = defaultdict(deque)
-        self._dns_queries: Dict[str, deque] = defaultdict(deque)
+        self._failed_logins: Dict[str, Deque[float]] = defaultdict(deque)
+        self._firewall_denies: Dict[str, Deque[Tuple[float, int]]] = defaultdict(deque)
+        self._vpn_fails: Dict[str, Deque[float]] = defaultdict(deque)
+        self._web_attacks: Dict[str, Deque[float]] = defaultdict(deque)
+        self._dns_queries: Dict[str, Deque[float]] = defaultdict(deque)
 
         # Statistical baseline for anomaly detection
-        self._event_rate_baseline: deque = deque(maxlen=60)  # Events per minute
-        self._current_minute_count = 0
-        self._last_minute_ts = time.time()
+        self._event_rate_baseline: Deque[int] = deque(maxlen=60)  # Events per minute
+        self._current_minute_count: int = 0
+        self._last_minute_ts: float = time.time()
 
         # Deduplication: track recent incident hashes to avoid alert spam
-        self._recent_incident_hashes: deque = deque(maxlen=200)
+        self._recent_incident_hashes: Deque[str] = deque(maxlen=200)
 
     # ─── Public API ─────────────────────────────────────────────────────
 
-    def analyze(self, event) -> Optional[Incident]:
+    def analyze(self, event: "NormalizedEvent") -> Optional[Incident]:
         """
         Process a single normalized log event through all detection layers.
 
@@ -135,85 +135,85 @@ class CorrelationEngine:
         Returns:
             Incident if a new threat was detected, None otherwise
         """
-        event_dict = event.to_dict() if hasattr(event, "to_dict") else event
-        src_ip = event_dict.get("src_ip", "")
-        now = time.time()
+        event_dict: Dict[str, Any] = event.to_dict() if hasattr(event, "to_dict") else event
+        src_ip: str = event_dict.get("src_ip", "")
+        now: float = time.time()
 
         # Update event rate for anomaly baseline
         self._update_event_rate(now)
 
         # Layer 1: Threat Intelligence Enrichment
-        incident = self._check_threat_intel(event_dict, src_ip)
+        incident: Optional[Incident] = self._check_threat_intel(event_dict, src_ip)
         if incident:
             return incident
 
         # Layer 2: Threshold-Based Rule Detection
-        event_type = event_dict.get("event_type", "")
-        source = event_dict.get("source_type", "")
+        event_type: str = event_dict.get("event_type", "")
+        source: str = event_dict.get("source_type", "")
 
         # Brute Force Detection (AD failed logins)
         if event_type == "failed_logon":
-            incident = self._detect_brute_force(event_dict, src_ip, now)
+            incident: Optional[Incident] = self._detect_brute_force(event_dict, src_ip, now)
             if incident:
                 return incident
 
         # Port Scan Detection (firewall denies)
         if source == "firewall" and event_dict.get("action") in ("DENY", "DROP", "REJECT"):
-            incident = self._detect_port_scan(event_dict, src_ip, now)
+            incident: Optional[Incident] = self._detect_port_scan(event_dict, src_ip, now)
             if incident:
                 return incident
 
         # VPN Brute Force Detection
         if event_type == "vpn_auth_fail":
-            incident = self._detect_vpn_brute_force(event_dict, src_ip, now)
+            incident: Optional[Incident] = self._detect_vpn_brute_force(event_dict, src_ip, now)
             if incident:
                 return incident
 
         # Web Application Attack Detection
         if event_type in ("injection_attempt", "recon_attempt"):
-            incident = self._detect_web_attacks(event_dict, src_ip, now)
+            incident: Optional[Incident] = self._detect_web_attacks(event_dict, src_ip, now)
             if incident:
                 return incident
 
         # DNS Tunneling Detection
         if event_type == "dns_tunnel_suspect":
-            incident = self._detect_dns_tunnel(event_dict, src_ip, now)
+            incident: Optional[Incident] = self._detect_dns_tunnel(event_dict, src_ip, now)
             if incident:
                 return incident
 
         # Layer 3: Cross-Source Correlation
-        incident = self._cross_source_correlation(event_dict, src_ip, now)
+        incident: Optional[Incident] = self._cross_source_correlation(event_dict, src_ip, now)
         if incident:
             return incident
 
         return None
 
-    def get_new_incidents(self) -> List[dict]:
+    def get_new_incidents(self) -> List[Dict[str, Any]]:
         """Retrieve and flush pending incidents for the dashboard."""
-        pending = [inc.to_dict() for inc in self.incidents]
+        pending: List[Dict[str, Any]] = [inc.to_dict() for inc in self.incidents]
         self.incidents.clear()
         return pending
 
-    def get_all_incidents(self) -> List[dict]:
+    def get_all_incidents(self) -> List[Dict[str, Any]]:
         """Get all incidents without flushing (for API)."""
         return [inc.to_dict() for inc in self.incidents]
 
     def get_mitre_summary(self) -> Dict[str, int]:
         """Return count of detections per MITRE ATT&CK tactic."""
-        summary = defaultdict(int)
+        summary: Dict[str, int] = defaultdict(int)
         for inc in self.incidents:
-            tactic = inc.mitre.get("tactic", "Unknown")
-            summary[tactic] += 1
+            tactic: str = inc.mitre.get("tactic", "Unknown")
+            summary[tactic] += 1  # type: ignore
         return dict(summary)
 
     # ─── Detection Rules ────────────────────────────────────────────────
 
-    def _check_threat_intel(self, event: dict, src_ip: str) -> Optional[Incident]:
+    def _check_threat_intel(self, event: Dict[str, Any], src_ip: str) -> Optional[Incident]:
         """Layer 1: Enrich with threat intelligence and alert on known bad IPs."""
         if not src_ip:
             return None
 
-        ti_data = self.ti_feed.check_ip(src_ip)
+        ti_data: Dict[str, Any] = self.ti_feed.check_ip(src_ip)
         event["ti_enrichment"] = ti_data
 
         if not ti_data["safe"]:
@@ -229,9 +229,9 @@ class CorrelationEngine:
             )
         return None
 
-    def _detect_brute_force(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _detect_brute_force(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """Detect brute force attacks via failed login threshold."""
-        window = self._failed_logins[src_ip]
+        window: Deque[float] = self._failed_logins[src_ip]
         window.append(now)
 
         # Trim events outside the time window
@@ -239,8 +239,8 @@ class CorrelationEngine:
             window.popleft()
 
         if len(window) >= self.BRUTE_FORCE_THRESHOLD:
-            target_user = event.get("username", "unknown")
-            incident = self._create_incident(
+            target_user: str = event.get("username", "unknown")
+            incident: Optional[Incident] = self._create_incident(
                 severity="Critical",
                 description=f"Brute Force Attack: {len(window)} failed logins from {src_ip} targeting '{target_user}'",
                 attack_type="brute_force",
@@ -253,9 +253,9 @@ class CorrelationEngine:
             return incident
         return None
 
-    def _detect_port_scan(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _detect_port_scan(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """Detect port scanning via firewall deny threshold."""
-        window = self._firewall_denies[src_ip]
+        window: Deque[Tuple[float, int]] = self._firewall_denies[src_ip]
         window.append((now, event.get("dst_port", 0)))
 
         # Trim old entries
@@ -263,10 +263,10 @@ class CorrelationEngine:
             window.popleft()
 
         if len(window) >= self.PORT_SCAN_THRESHOLD:
-            unique_ports = len(set(p[1] for p in window))
-            severity = "Critical" if unique_ports > 15 else "High" if unique_ports > 8 else "Medium"
+            unique_ports: int = len(set(p[1] for p in window))
+            severity: str = "Critical" if unique_ports > 15 else "High" if unique_ports > 8 else "Medium"
 
-            incident = self._create_incident(
+            incident: Optional[Incident] = self._create_incident(
                 severity=severity,
                 description=f"Port Scan Detected: {len(window)} blocked connections from {src_ip} ({unique_ports} unique ports)",
                 attack_type="port_scan",
@@ -279,16 +279,16 @@ class CorrelationEngine:
             return incident
         return None
 
-    def _detect_vpn_brute_force(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _detect_vpn_brute_force(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """Detect VPN brute force attacks."""
-        window = self._vpn_fails[src_ip]
+        window: Deque[float] = self._vpn_fails[src_ip]
         window.append(now)
 
         while window and (now - window[0]) > self.VPN_FAIL_WINDOW:
             window.popleft()
 
         if len(window) >= self.VPN_FAIL_THRESHOLD:
-            incident = self._create_incident(
+            incident: Optional[Incident] = self._create_incident(
                 severity="High",
                 description=f"VPN Brute Force: {len(window)} failed attempts from {src_ip}",
                 attack_type="vpn_brute_force",
@@ -301,17 +301,17 @@ class CorrelationEngine:
             return incident
         return None
 
-    def _detect_web_attacks(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _detect_web_attacks(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """Detect web application attacks (SQLi, XSS, LFI)."""
-        window = self._web_attacks[src_ip]
+        window: Deque[float] = self._web_attacks[src_ip]
         window.append(now)
 
         while window and (now - window[0]) > self.WEB_ATTACK_WINDOW:
             window.popleft()
 
         if len(window) >= self.WEB_ATTACK_THRESHOLD:
-            uri = event.get("metadata", {}).get("uri", "")
-            incident = self._create_incident(
+            uri: str = event.get("metadata", {}).get("uri", "")
+            incident: Optional[Incident] = self._create_incident(
                 severity="Critical",
                 description=f"Web Application Attack: {len(window)} malicious requests from {src_ip} (last: {uri[:60]})",
                 attack_type="sql_injection",
@@ -324,10 +324,10 @@ class CorrelationEngine:
             return incident
         return None
 
-    def _detect_dns_tunnel(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _detect_dns_tunnel(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """Detect potential DNS tunneling."""
-        domain = event.get("metadata", {}).get("domain", "")
-        return self._create_incident(
+        domain: str = event.get("metadata", {}).get("domain", "")
+        incident: Optional[Incident] = self._create_incident(
             severity="High",
             description=f"Potential DNS Tunneling: Unusually long domain query from {src_ip} ({domain[:40]}...)",
             attack_type="dns_tunnel",
@@ -336,8 +336,9 @@ class CorrelationEngine:
             source="dns",
             events=[event],
         )
+        return incident
 
-    def _cross_source_correlation(self, event: dict, src_ip: str, now: float) -> Optional[Incident]:
+    def _cross_source_correlation(self, event: Dict[str, Any], src_ip: str, now: float) -> Optional[Incident]:
         """
         Layer 3: Cross-source correlation.
         Looks for patterns that span multiple log sources, such as:
@@ -345,7 +346,7 @@ class CorrelationEngine:
         - Failed VPN + successful login from same IP = potential credential theft
         """
         # Check if this IP has been seen in multiple suspicious contexts
-        suspicious_sources = 0
+        suspicious_sources: int = 0
         if src_ip in self._failed_logins and len(self._failed_logins[src_ip]) >= 2:
             suspicious_sources += 1
         if src_ip in self._firewall_denies and len(self._firewall_denies[src_ip]) >= 3:
@@ -369,15 +370,15 @@ class CorrelationEngine:
 
     # ─── Helpers ────────────────────────────────────────────────────────
 
-    def _create_incident(self, **kwargs) -> Optional[Incident]:
+    def _create_incident(self, **kwargs: Any) -> Optional[Incident]:
         """Create an incident with deduplication check."""
         # Generate a dedup hash based on attack_type + src_ip
-        dedup_key = f"{kwargs.get('attack_type', '')}:{kwargs.get('src_ip', '')}"
+        dedup_key: str = f"{kwargs.get('attack_type', '')}:{kwargs.get('src_ip', '')}"
         if dedup_key in self._recent_incident_hashes:
             return None
 
         self._recent_incident_hashes.append(dedup_key)
-        incident = Incident(**kwargs)
+        incident: Incident = Incident(**kwargs)
         self.incidents.append(incident)
         print(f"  [{incident.severity.upper()}] {incident.description}")
         return incident

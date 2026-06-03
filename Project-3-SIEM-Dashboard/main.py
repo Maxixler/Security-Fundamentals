@@ -29,31 +29,22 @@ import os
 import threading
 import time
 import random
+from typing import Callable, Tuple, Optional, Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 
-from siem.log_aggregator import LogAggregator
+from siem.application import get_application_state
+from siem.log_aggregator import LogAggregator, NormalizedEvent
 from siem.correlation_engine import CorrelationEngine
 from siem.threat_intel import ThreatIntelFeed
 from siem.anomaly_detector import AnomalyDetector
 
 
 # ─── Application State ─────────────────────────────────────────────────
-aggregator = LogAggregator(max_buffer=500)
-correlator = CorrelationEngine()
-anomaly_detector = AnomalyDetector(window_size=30, sensitivity=2.0)
-
-# Bounded buffers for UI consumption
-system_alerts = []
-historical_logs = []
-MAX_ALERTS = 50
-MAX_LOGS = 100
-
-# Simulation running flag
-simulation_running = False
+app_state = get_application_state()
 
 
 def banner():
@@ -242,50 +233,62 @@ def _pick_generator():
     return random.choice(choices)
 
 
-def run_simulation():
+def run_simulation() -> None:
     """
     Background thread that continuously generates simulated enterprise logs,
     feeds them through the aggregator → correlator → anomaly detector pipeline,
-    and populates the global alert/log buffers for the dashboard.
+    and populates the alert/log buffers for the dashboard.
     """
-    global simulation_running
-    simulation_running = True
+    app_state.start_simulation()
     print("  [*] Log simulation engine started (5 sources active)")
 
-    while simulation_running:
+    while app_state.is_simulation_running():
         # Random delay to simulate realistic log arrival patterns
         time.sleep(random.uniform(0.3, 2.0))
 
         # Occasionally generate bursts (simulate attacks)
-        burst_count = 1
+        burst_count: int = 1
         if random.random() > 0.92:
             burst_count = random.randint(3, 8)  # Attack burst
 
         for _ in range(burst_count):
-            generator = _pick_generator()
+            generator: Callable[[], Tuple[str, str]] = _pick_generator()
+            log_type: str
+            raw_log: str
             log_type, raw_log = generator()
 
             # Step 1: Ingest & normalize
-            event = aggregator.ingest_log(log_type, raw_log)
+            event: Optional[NormalizedEvent] = app_state.aggregator.ingest_log(log_type, raw_log)
             if not event:
                 continue
 
             # Add to historical log buffer
-            event_dict = event.to_dict()
-            historical_logs.insert(0, event_dict)
-            if len(historical_logs) > MAX_LOGS:
-                historical_logs.pop()
+            event_dict: Dict[str, Any] = event.to_dict()
+            app_state.add_log(event_dict)
 
-            # Step 2: Anomaly detection
-            anomaly_detector.process_event(event_dict)
+            app_state.increment_events_processed()
+
+            # Step 2: Anomaly detection (both statistical and ML)
+            app_state.anomaly_detector.process_event(event_dict)
+
+            # Also process with ML detector if trained
+            if app_state.ml_anomaly_detector.is_trained:
+                ml_is_anomaly: bool
+                ml_confidence: float
+                ml_details: Dict[str, Any]
+                ml_is_anomaly, ml_confidence, ml_details = app_state.ml_anomaly_detector.predict_anomaly(event_dict)
+                # Optionally log ML predictions for debugging
+                if ml_is_anomaly and ml_confidence > 0.7:
+                    print(f"  [ML] High confidence anomaly detected: {ml_confidence:.2f}")
+
+            # Add event to ML training buffer for continuous learning
+            app_state.add_event_for_ml_training(event_dict)
 
             # Step 3: Correlation
-            incident = correlator.analyze(event)
+            incident: Optional[Incident] = app_state.correlator.analyze(event)
             if incident:
-                alert_data = incident.to_dict()
-                system_alerts.insert(0, alert_data)
-                if len(system_alerts) > MAX_ALERTS:
-                    system_alerts.pop()
+                alert_data: Dict[str, Any] = incident.to_dict()
+                app_state.add_alert(alert_data)
 
 
 # ─── Flask Web Application ─────────────────────────────────────────────
@@ -307,12 +310,9 @@ def serve_static(filename):
 def get_status():
     """Main polling endpoint for the dashboard."""
     return jsonify({
-        "alerts": system_alerts[:20],
-        "recent_logs": historical_logs[:15],
-        "stats": aggregator.get_stats(),
-        "baselines": anomaly_detector.get_baseline_status(),
-        "anomalies": anomaly_detector.get_anomalies(),
-        "ti_stats": correlator.ti_feed.get_stats(),
+        "alerts": app_state.get_alerts(limit=20),
+        "recent_logs": app_state.get_logs(limit=15),
+        "stats": app_state.get_stats(),
     })
 
 
@@ -320,21 +320,17 @@ def get_status():
 def get_alerts():
     """Get all alerts with optional severity filter."""
     severity = request.args.get("severity", "").lower()
-    if severity:
-        filtered = [a for a in system_alerts if a.get("severity", "").lower() == severity]
-        return jsonify({"alerts": filtered, "total": len(filtered)})
-    return jsonify({"alerts": system_alerts, "total": len(system_alerts)})
+    alerts = app_state.get_alerts(severity_filter=severity if severity else None)
+    return jsonify({"alerts": alerts, "total": len(alerts)})
 
 
 @app.route("/api/logs")
 def get_logs():
     """Get recent logs with optional source filter."""
     source = request.args.get("source", "")
-    count = min(int(request.args.get("count", 50)), MAX_LOGS)
-    if source:
-        filtered = [l for l in historical_logs if l.get("source_type") == source][:count]
-        return jsonify({"logs": filtered, "total": len(filtered)})
-    return jsonify({"logs": historical_logs[:count], "total": len(historical_logs)})
+    count = min(int(request.args.get("count", 50)), 100)  # MAX_LOGS from ApplicationState
+    logs = app_state.get_logs(limit=count, source_filter=source if source else None)
+    return jsonify({"logs": logs, "total": app_state.get_log_count()})
 
 
 @app.route("/api/search", methods=["POST"])
@@ -523,7 +519,7 @@ def _start_web_dashboard(port=5003):
 
 
 # ─── Entry Point ────────────────────────────────────────────────────────
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Enterprise SIEM & SOC Dashboard — Security-Fundamentals Project 3",
         formatter_class=argparse.RawDescriptionHelpFormatter,

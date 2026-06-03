@@ -26,7 +26,7 @@ from typing import Optional, Dict, List, Any
 
 
 # ─── CEF Severity Mapping ──────────────────────────────────────────────
-CEF_SEVERITY_MAP = {
+CEF_SEVERITY_MAP: Dict[str, int] = {
     "EMERGENCY": 10, "ALERT": 9, "CRITICAL": 8,
     "ERROR": 7, "WARNING": 6, "NOTICE": 5,
     "INFO": 4, "DEBUG": 3,
@@ -154,7 +154,7 @@ class LogAggregator:
         max_buffer: Maximum events to retain in memory
     """
 
-    def __init__(self, max_buffer: int = 500):
+    def __init__(self, max_buffer: int = 500) -> None:
         self.events: List[NormalizedEvent] = []
         self.max_buffer = max_buffer
         self.stats: Dict[str, int] = {
@@ -203,7 +203,7 @@ class LogAggregator:
             self.stats["parse_errors"] += 1
             return None
 
-    def get_recent_events(self, count: int = 20) -> List[dict]:
+    def get_recent_events(self, count: int = 20) -> List[Dict[str, Any]]:
         """Return the most recent N events as dictionaries."""
         return [e.to_dict() for e in self.events[-count:]]
 
@@ -223,7 +223,7 @@ class LogAggregator:
             return None
 
         action = match.group("action")
-        severity = 7 if action in ("DENY", "DROP", "REJECT") else 4
+        severity: int = 7 if action in ("DENY", "DROP", "REJECT") else 4
 
         return NormalizedEvent(
             timestamp=match.group("timestamp"),
@@ -247,14 +247,14 @@ class LogAggregator:
         4726 (user deleted), 4732 (member added to group).
         """
         try:
-            data = json.loads(raw)
+            data: Dict[str, Any] = json.loads(raw)
         except json.JSONDecodeError:
             return None
 
-        event_id = data.get("EventID", 0)
+        event_id: int = data.get("EventID", 0)
 
         # Map Windows Event IDs to semantic types
-        event_map = {
+        event_map: Dict[int, Tuple[str, str, int, str]] = {
             4624: ("successful_logon", "SUCCESS", 4, "Successful authentication"),
             4625: ("failed_logon", "FAILURE", 7, "Failed authentication attempt"),
             4720: ("user_created", "CREATE", 5, "New user account created"),
@@ -265,7 +265,7 @@ class LogAggregator:
             4771: ("kerberos_preauth_fail", "FAILURE", 7, "Kerberos pre-authentication failed"),
         }
 
-        event_info = event_map.get(event_id, ("ad_generic", "INFO", 4, "AD event"))
+        event_info: Tuple[str, str, int, str] = event_map.get(event_id, ("ad_generic", "INFO", 4, "AD event"))
 
         return NormalizedEvent(
             timestamp=data.get("TimeCreated", datetime.now().isoformat()),
@@ -290,13 +290,13 @@ class LogAggregator:
         if not match:
             return None
 
-        status_code = int(match.group("status"))
-        method = match.group("method")
-        uri = match.group("uri")
+        status_code: int = int(match.group("status"))
+        method: str = match.group("method")
+        uri: str = match.group("uri")
 
         # Determine severity based on status code and URI patterns
-        severity = 4
-        event_type = "web_request"
+        severity: int = 4
+        event_type: str = "web_request"
         if status_code >= 500:
             severity = 7
             event_type = "server_error"
@@ -308,7 +308,7 @@ class LogAggregator:
             event_type = "recon_attempt"
 
         # Check for suspicious URI patterns (injection attempts)
-        suspicious_patterns = ["' OR ", "UNION SELECT", "<script>", "../", "etc/passwd", "cmd.exe"]
+        suspicious_patterns: List[str] = ["' OR ", "UNION SELECT", "<script>", "../", "etc/passwd", "cmd.exe"]
         if any(pat.lower() in uri.lower() for pat in suspicious_patterns):
             severity = 8
             event_type = "injection_attempt"
@@ -335,22 +335,22 @@ class LogAggregator:
         Parse DNS query log format.
         Example: "2026-04-05T10:00:01 192.168.1.10#52341 query: evil.com A IN"
         """
-        match = _DNS_PATTERN.search(raw)
+        match: Optional[Match[str]] = _DNS_PATTERN.search(raw)
         if not match:
             return None
 
-        domain = match.group("domain")
-        severity = 4
+        domain: str = match.group("domain")
+        severity: int = 4
 
         # Check for suspicious DNS patterns
-        event_type = "dns_query"
-        suspicious_tlds = [".tk", ".ml", ".cf", ".xyz", ".top", ".buzz"]
+        event_type: str = "dns_query"
+        suspicious_tlds: List[str] = [".tk", ".ml", ".cf", ".xyz", ".top", ".buzz"]
         if any(domain.endswith(tld) for tld in suspicious_tlds):
-            severity = 6
-            event_type = "suspicious_dns"
+            severity: int = 6
+            event_type: str = "suspicious_dns"
         if len(domain) > 60:
-            severity = 7
-            event_type = "dns_tunnel_suspect"
+            severity: int = 7
+            event_type: str = "dns_tunnel_suspect"
 
         return NormalizedEvent(
             timestamp=match.group("timestamp"),
@@ -369,12 +369,12 @@ class LogAggregator:
         Parse VPN authentication log format.
         Example: "2026-04-05 10:00:01 [VPN] CONNECT USER=john IP=10.0.0.5"
         """
-        match = _VPN_PATTERN.search(raw)
+        match: Optional[Match[str]] = _VPN_PATTERN.search(raw)
         if not match:
             return None
 
-        action = match.group("action")
-        severity_map = {"CONNECT": 4, "DISCONNECT": 4, "AUTH_FAIL": 7}
+        action: str = match.group("action")
+        severity_map: Dict[str, int] = {"CONNECT": 4, "DISCONNECT": 4, "AUTH_FAIL": 7}
 
         return NormalizedEvent(
             timestamp=match.group("timestamp"),
@@ -394,7 +394,7 @@ class LogAggregator:
         Parse RFC 5424 syslog format.
         Example: "<134>1 2026-04-05T10:00:01Z server01 sshd 1234 - Connection closed"
         """
-        match = _SYSLOG_PATTERN.search(raw)
+        match: Optional[Match[str]] = _SYSLOG_PATTERN.search(raw)
         if not match:
             # Fallback: treat as plain text syslog
             return NormalizedEvent(
@@ -406,10 +406,10 @@ class LogAggregator:
             )
 
         # RFC 5424: PRI = facility * 8 + severity
-        pri = int(match.group("pri"))
-        syslog_severity = pri % 8
+        pri: int = int(match.group("pri"))
+        syslog_severity: int = pri % 8
         # Map syslog severity (0-7, lower=more severe) to our scale (0-10, higher=more severe)
-        severity = max(0, 10 - syslog_severity)
+        severity: int = max(0, 10 - syslog_severity)
 
         return NormalizedEvent(
             timestamp=match.group("timestamp"),

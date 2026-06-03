@@ -21,7 +21,7 @@ Architecture:
 import math
 import time
 from collections import defaultdict, deque
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Deque
 from datetime import datetime
 
 
@@ -33,14 +33,14 @@ class BaselineProfile:
     to track the mean and standard deviation of a metric over time.
     """
 
-    def __init__(self, window_size: int = 60, sensitivity: float = 2.0):
+    def __init__(self, window_size: int = 60, sensitivity: float = 2.0) -> None:
         """
         Args:
             window_size: Number of data points to maintain in the sliding window
             sensitivity: Z-score threshold for anomaly detection (default 2.0 = 95%)
         """
-        self.window: deque = deque(maxlen=window_size)
-        self.sensitivity = sensitivity
+        self.window: Deque[float] = deque(maxlen=window_size)
+        self.sensitivity: float = sensitivity
         self.total_observations: int = 0
 
     @property
@@ -55,8 +55,8 @@ class BaselineProfile:
         """Calculate the standard deviation of the baseline window."""
         if len(self.window) < 2:
             return 0.0
-        avg = self.mean
-        variance = sum((x - avg) ** 2 for x in self.window) / (len(self.window) - 1)
+        avg: float = self.mean
+        variance: float = sum((x - avg) ** 2 for x in self.window) / (len(self.window) - 1)
         return math.sqrt(variance)
 
     def update(self, value: float) -> None:
@@ -75,12 +75,12 @@ class BaselineProfile:
             # Not enough data to establish a baseline
             return False, 0.0
 
-        std = self.std_dev
+        std: float = self.std_dev
         if std == 0:
             # Zero variance — any deviation is anomalous
             return value != self.mean, 0.0
 
-        z_score = abs(value - self.mean) / std
+        z_score: float = abs(value - self.mean) / std
         return z_score > self.sensitivity, round(z_score, 2)
 
     def get_status(self) -> Dict[str, Any]:
@@ -113,7 +113,7 @@ class AnomalyDetector:
         anomalies: Queue of detected anomalies for dashboard consumption
     """
 
-    def __init__(self, window_size: int = 60, sensitivity: float = 2.0):
+    def __init__(self, window_size: int = 60, sensitivity: float = 2.0) -> None:
         self.baselines: Dict[str, BaselineProfile] = {
             "events_per_minute": BaselineProfile(window_size, sensitivity),
             "logins_per_minute": BaselineProfile(window_size, sensitivity),
@@ -136,7 +136,7 @@ class AnomalyDetector:
         self.anomalies: List[Dict[str, Any]] = []
         self._max_anomalies: int = 100
 
-    def process_event(self, event: dict) -> Optional[Dict[str, Any]]:
+    def process_event(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Process a normalized event and check for anomalies.
 
@@ -146,7 +146,7 @@ class AnomalyDetector:
         Returns:
             Anomaly dict if a deviation was detected, None otherwise
         """
-        now = time.time()
+        now: float = time.time()
 
         # Flush counters every 60 seconds to update baselines
         if now - self._last_flush_time >= 60:
@@ -155,12 +155,12 @@ class AnomalyDetector:
 
         # Update metric counters
         self._minute_counters["events_per_minute"] += 1
-        src_ip = event.get("src_ip", "")
+        src_ip: str = event.get("src_ip", "")
         if src_ip:
             self._minute_src_ips.add(src_ip)
 
-        event_type = event.get("event_type", "")
-        source = event.get("source_type", "")
+        event_type: str = event.get("event_type", "")
+        source: str = event.get("source_type", "")
 
         if event_type in ("failed_logon", "successful_logon"):
             self._minute_counters["logins_per_minute"] += 1
@@ -168,7 +168,7 @@ class AnomalyDetector:
         if event.get("action") in ("DENY", "DROP", "REJECT"):
             self._minute_counters["denies_per_minute"] += 1
 
-        status_code = event.get("metadata", {}).get("status_code", 0)
+        status_code: int = event.get("metadata", {}).get("status_code", 0)
         if status_code >= 500:
             self._minute_counters["error_rate"] += 1
 
@@ -184,16 +184,18 @@ class AnomalyDetector:
         Called once per minute.
         """
         # Update baselines and check for anomalies
-        self._minute_counters["unique_src_ips"] = len(self._minute_src_ips)
+        self._minute_counters["unique_src_ips"]: int = len(self._minute_src_ips)
 
         for metric_name, baseline in self.baselines.items():
-            current_value = self._minute_counters.get(metric_name, 0)
+            current_value: float = self._minute_counters.get(metric_name, 0)
 
             # Check for anomaly before updating (so we compare against existing baseline)
+            is_anomaly: bool
+            z_score: float
             is_anomaly, z_score = baseline.is_anomalous(current_value)
 
             if is_anomaly:
-                anomaly = {
+                anomaly: Dict[str, Any] = {
                     "timestamp": datetime.now().isoformat(),
                     "metric": metric_name,
                     "current_value": current_value,
@@ -214,12 +216,12 @@ class AnomalyDetector:
             baseline.update(current_value)
 
         # Reset minute counters
-        self._minute_counters = defaultdict(float)
-        self._minute_src_ips = set()
+        self._minute_counters: Dict[str, float] = defaultdict(float)
+        self._minute_src_ips: set = set()
 
     def get_anomalies(self) -> List[Dict[str, Any]]:
         """Return and flush detected anomalies."""
-        result = self.anomalies.copy()
+        result: List[Dict[str, Any]] = self.anomalies.copy()
         self.anomalies.clear()
         return result
 

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  siem:
+    build: .
+    ports:
+      - "5003:5003"
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Add dependencies for enhanced features
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: siem
+  #     POSTGRES_USER: siem_user
+  #     POSTGRES_PASSWORD: siem_pass
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+# volumes:
+#   redis_data:
+#   postgres_data:
