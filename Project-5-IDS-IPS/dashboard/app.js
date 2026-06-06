@@ -14,6 +14,11 @@ async function fetchData(){
         document.getElementById("stat-sigs").textContent=stats.signature_matches||0;
         document.getElementById("stat-blocked").textContent=(d.blocked_ips||[]).length;
         document.getElementById("rule-count").textContent=d.rule_count||0;
+
+        // Count ML anomalies from recent packets
+        const mlAnomalies = (d.packets||[]).filter(p=>p.ml_anomaly===true).length;
+        document.getElementById("stat-ml-anomalies").textContent = mlAnomalies;
+
         const currAnalyzed=stats.packets_analyzed||0;
         document.getElementById("pps").textContent=Math.max(0,currAnalyzed-prevAnalyzed);
         prevAnalyzed=currAnalyzed;

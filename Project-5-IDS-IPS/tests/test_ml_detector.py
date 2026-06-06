@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from engine.ml_anomaly_detector import MLAnomalyDetector
+from engine.detection.ml_anomaly_detector import MLAnomalyDetector
 
 def test_ml_detector_initialization():
     """Test that the ML detector initializes correctly."""

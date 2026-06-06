@@ -230,7 +230,7 @@ class SignatureEngine:
                 pass
         return compiled
 
-    def analyze_packet(self, packet: Any) -> DetectionResult:
+    async def analyze_packet(self, packet: Any) -> DetectionResult:
         """
         Analyze a single packet through all detection layers.
 

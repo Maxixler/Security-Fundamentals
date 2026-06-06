@@ -130,7 +130,7 @@ class TrafficGenerator:
         self.attack_ratio: float = attack_ratio
         self.packets_generated: int = 0
 
-    def generate_packet(self) -> Packet:
+    async def generate_packet(self) -> Packet:
         """Generate a single random packet (normal or attack)."""
         self.packets_generated += 1
 
