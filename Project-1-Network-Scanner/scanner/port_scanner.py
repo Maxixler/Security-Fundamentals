@@ -30,7 +30,7 @@ import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import sys
 import os
@@ -41,7 +41,7 @@ from utils.ip_utils import get_service_name
 class PortScanner:
     """
     Multi-threaded TCP/UDP port scanner with configurable scan profiles.
-    
+
     Supports:
     - TCP Connect Scan (full handshake)
     - Custom port ranges and profiles
@@ -118,7 +118,7 @@ class PortScanner:
     def tcp_connect_scan(self, ip: str, port: int) -> dict:
         """
         Perform a TCP Connect scan on a single port.
-        
+
         TCP Three-Way Handshake:
         ┌────────┐                    ┌────────┐
         │ Client │                    │ Server │
@@ -132,7 +132,7 @@ class PortScanner:
             │      ACK (ack=y+1)          │
             │ ──────────────────────────> │  Step 3: Connection established
             │                             │
-        
+
         Port States:
         - OPEN: SYN-ACK received → service is listening
         - CLOSED: RST received → no service, but host is alive
@@ -151,11 +151,11 @@ class PortScanner:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(self.timeout)
-            
+
             start_time = time.time()
             conn_result = sock.connect_ex((ip, port))
             end_time = time.time()
-            
+
             rtt = round((end_time - start_time) * 1000, 2)
 
             if conn_result == 0:
@@ -185,15 +185,79 @@ class PortScanner:
 
         return result
 
-    def scan_host(self, ip: str, ports: list = None, profile: str = "common") -> dict:
+    def udp_scan(self, ip: str, port: int) -> dict:
+        """
+        Perform a UDP scan on a single port.
+
+        UDP Scan Technique:
+        - Send UDP packet to target port
+        - If port is OPEN: May receive response (depends on service)
+        - If port is CLOSED: Receive ICMP Port Unreachable (Type 3, Code 3)
+        - If port is FILTERED: No response (firewall dropping)
+
+        Note: UDP scanning is unreliable and slow due to:
+        - No guaranteed response from open ports
+        - Rate limiting on ICMP error messages
+        - Requires root/admin for raw sockets to properly detect ICMP
+        """
+        result = {
+            "port": port,
+            "state": "closed",  # Default assumption
+            "service": "",
+            "description": "",
+            "rtt_ms": None,
+            "is_ot_port": port in self.OT_PORTS,
+            "ot_protocol": self.OT_PORTS.get(port, ""),
+        }
+
+        try:
+            # Create UDP socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(self.timeout)
+
+            # Send a UDP packet (empty payload for most services)
+            start_time = time.time()
+            sock.sendto(b"", (ip, port))
+
+            try:
+                # Try to receive a response
+                data, addr = sock.recvfrom(1024)
+                end_time = time.time()
+
+                # If we get a response, port is OPEN or OPEN|FILTERED
+                rtt = round((end_time - start_time) * 1000, 2)
+                result["state"] = "open"
+                result["rtt_ms"] = rtt
+                service_name, description = get_service_name(port)
+                result["service"] = service_name
+                result["description"] = description
+
+            except socket.timeout:
+                # No response - could be OPEN|FILTERED or FILTERED
+                # Without ability to receive ICMP, we can't distinguish
+                result["state"] = "open|filtered"
+
+            sock.close()
+
+        except PermissionError:
+            # Raw sockets needed for proper ICMP detection - fall back to basic UDP
+            result["state"] = "udp (requires root for full functionality)"
+        except OSError as e:
+            result["state"] = "error"
+            result["description"] = str(e)
+
+        return result
+
+    def scan_host(self, ip: str, ports: list = None, profile: str = "common", scan_type: str = "tcp") -> dict:
         """
         Scan all specified ports on a single host.
-        
+
         Args:
             ip: Target IP address
             ports: List of ports to scan (overrides profile)
             profile: Scan profile ('quick', 'common', 'top100', 'full')
-            
+            scan_type: Type of scan ('tcp' or 'udp')
+
         Returns:
             dict: Scan results with open, closed, and filtered ports
         """
@@ -205,13 +269,17 @@ class PortScanner:
         closed_count = 0
         filtered_count = 0
 
-        print(f"\n[*] Scanning {ip} | {len(ports)} ports | Profile: {profile}")
+        scan_type_name = "TCP" if scan_type == "tcp" else "UDP"
+        print(f"\n[*] Scanning {ip} | {len(ports)} ports | Profile: {profile} | Type: {scan_type_name}")
         print(f"[*] Timeout: {self.timeout}s | Threads: {self.max_threads}")
         print("-" * 60)
 
+        # Select scan function based on type
+        scan_func = self.tcp_connect_scan if scan_type == "tcp" else self.udp_scan
+
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
             futures = {
-                executor.submit(self.tcp_connect_scan, ip, port): port 
+                executor.submit(scan_func, ip, port): port
                 for port in ports
             }
 
@@ -220,10 +288,12 @@ class PortScanner:
                 completed += 1
                 try:
                     result = future.result()
-                    if result["state"] == "open":
+                    if result["state"] == "open" or (scan_type == "udp" and result["state"] == "open|filtered"):
                         open_ports.append(result)
+                        protocol_suffix = "/udp" if scan_type == "udp" else "/tcp"
                         ot_flag = " [OT/ICS!]" if result["is_ot_port"] else ""
-                        print(f"  [+] {result['port']:>5}/tcp  OPEN    {result['service']:<16} {result['description']}{ot_flag}")
+                        state_display = "OPEN" if result["state"] == "open" else "OPEN|FILTERED"
+                        print(f"  [+] {result['port']:>5}{protocol_suffix:<6} {state_display:<12} {result['service']:<16} {result['description']}{ot_flag}")
                     elif result["state"] == "filtered":
                         filtered_count += 1
                     else:
@@ -250,28 +320,30 @@ class PortScanner:
             "closed_count": closed_count,
             "filtered_count": filtered_count,
             "profile": profile,
+            "scan_type": scan_type,
         }
 
         print("-" * 60)
         print(f"[*] Scan complete in {elapsed:.2f}s")
         print(f"[*] Results: {len(open_ports)} open | {closed_count} closed | {filtered_count} filtered")
-        
-        # Security warnings
-        self._security_analysis(open_ports)
+
+        # Security warnings (only for TCP scans as UDP analysis is limited)
+        if scan_type == "tcp":
+            self._security_analysis(open_ports)
 
         return scan_result
 
     def _security_analysis(self, open_ports: list):
         """
         Provide basic security analysis of discovered open ports.
-        
+
         This simulates what a security analyst would check:
         - High-risk services (Telnet, FTP, etc.)
         - OT/ICS ports exposed to IT network
         - Database ports accessible externally
         """
         warnings = []
-        
+
         risky_ports = {
             23: "Telnet is UNENCRYPTED - use SSH instead",
             21: "FTP transmits credentials in cleartext",

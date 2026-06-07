@@ -1,0 +1,44 @@
+{
+  "report_metadata": {
+    "tool": "Network Scanner v1.0",
+    "generated_at": "2026-06-07T14:02:18.459608",
+    "report_type": "Network Scan Report"
+  },
+  "scan_results": {
+    "target": "127.0.0.1",
+    "scan_time": "2026-06-07T14:02:12.431768",
+    "duration_seconds": 1.01,
+    "ports_scanned": 36,
+    "open_ports": [
+      {
+        "port": 3389,
+        "state": "open|filtered",
+        "service": "",
+        "description": "",
+        "rtt_ms": null,
+        "is_ot_port": false,
+        "ot_protocol": ""
+      }
+    ],
+    "open_count": 1,
+    "closed_count": 35,
+    "filtered_count": 0,
+    "profile": "common",
+    "scan_type": "udp",
+    "services": [
+      {
+        "ip": "127.0.0.1",
+        "port": 3389,
+        "protocol": "unknown",
+        "banner": "",
+        "service": "",
+        "version": "",
+        "os_hint": "",
+        "ssl": false,
+        "ssl_info": {},
+        "security_notes": [],
+        "timestamp": "2026-06-07T14:02:13.441051"
+      }
+    ]
+  }
+}

@@ -24,6 +24,7 @@ import argparse
 import json
 import sys
 import os
+import asyncio
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -31,32 +32,26 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scanner.host_discovery import HostDiscovery
 from scanner.port_scanner import PortScanner
 from scanner.service_detector import ServiceDetector
+from scanner.credential_scanner import CredentialScanner
 from utils.ip_utils import parse_target, get_subnet_info, get_local_ip, get_local_subnet
 from utils.report_generator import ReportGenerator
 
 
 def banner():
-    print(r"""
-    ╔═══════════════════════════════════════════════════════════╗
-    ║                                                           ║
-    ║   ███╗   ██╗███████╗████████╗    ███████╗ ██████╗ █████╗  ║
-    ║   ████╗  ██║██╔════╝╚══██╔══╝    ██╔════╝██╔════╝██╔══██╗ ║
-    ║   ██╔██╗ ██║█████╗     ██║       ███████╗██║     ███████║ ║
-    ║   ██║╚██╗██║██╔══╝     ██║       ╚════██║██║     ██╔══██║ ║
-    ║   ██║ ╚████║███████╗   ██║       ███████║╚██████╗██║  ██║ ║
-    ║   ╚═╝  ╚═══╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝╚═╝  ╚═╝ ║
-    ║                                                           ║
-    ║   Network Scanner & Port Analyzer v1.0                    ║
-    ║   Security-Fundamentals Project 1                         ║
-    ║                                                           ║
-    ╚═══════════════════════════════════════════════════════════╝
+    print("""
+    +======================================================================+
+    |                                                                      |
+    |   Network Scanner & Port Analyzer v1.0                               |
+    |   Security-Fundamentals Project 1                                    |
+    |                                                                      |
+    +======================================================================+
     """)
 
 
 def interactive_mode():
     """Run the scanner in interactive mode with menu options."""
     banner()
-    
+
     local_ip = get_local_ip()
     local_subnet = get_local_subnet()
     print(f"  [*] Your IP: {local_ip}")
@@ -107,7 +102,7 @@ def _host_discovery_menu(default_subnet):
         return
 
     print(f"  [*] Parsed {len(targets)} target IPs")
-    
+
     method = input("  Method [tcp/icmp] (default: tcp): ").strip().lower()
     if method not in ("tcp", "icmp"):
         method = "tcp"
@@ -188,6 +183,7 @@ def _full_scan_menu(default_subnet):
     # Phase 2 & 3: Port Scan + Service Detection for each host
     scanner = PortScanner(timeout=1.0, max_threads=200)
     detector = ServiceDetector(timeout=3.0)
+    cred_scanner = CredentialScanner()
 
     for host in hosts:
         ip = host["ip"]
@@ -198,6 +194,26 @@ def _full_scan_menu(default_subnet):
             print(f"[Phase 3/3] Service detection on {ip}")
             services = detector.detect_services(ip, port_results["open_ports"])
             port_results["services"] = services
+
+            # Phase 3.4: CVE Vulnerability Intelligence
+            print(f"[Phase 3.4/3] CVE vulnerability intelligence on {ip}")
+            cve_integrator = CVEIntegrator()
+            services_with_cve = cve_integrator.enrich_services_with_cve(services)
+            port_results["services"] = services_with_cve
+
+            # Show CVE summary
+            total_cves = sum(len(s.get("cves", [])) for s in services_with_cve)
+            critical_cves = sum(1 for s in services_with_cve for cve in s.get("cves", []) if cve.get("cvss", 0) >= 9.0)
+            if total_cves > 0:
+                print(f"  [!] Found {total_cves} CVEs ({critical_cves} critical)")
+
+            # Phase 3.5: Credential-based scanning
+            print(f"[Phase 3.5/3] Credential-based scanning on {ip}")
+            cred_results = asyncio.run(cred_scanner.scan_services(ip, services_with_cve))
+            port_results["credential_scan_results"] = cred_results
+
+            if cred_results:
+                print(f"  [!] Found {len(cred_results)} credential-based vulnerabilities")
 
         all_results["host_scans"].append(port_results)
 
@@ -214,7 +230,7 @@ def _subnet_calculator():
     """Interactive subnet calculator - educational tool."""
     print("\n--- SUBNET CALCULATOR ---")
     print("  Learn about IP subnetting!")
-    
+
     cidr = input("  Enter CIDR (e.g., 192.168.1.0/24): ").strip()
     info = get_subnet_info(cidr)
 
@@ -330,7 +346,7 @@ def start_web_server(host="0.0.0.0", port=5000):
         # Port scan + service detect each host
         scanner = PortScanner(timeout=1.0, max_threads=200)
         detector = ServiceDetector(timeout=3.0)
-        
+
         host_scans = []
         for host in hosts:
             ip = host["ip"]
@@ -361,6 +377,7 @@ def main():
     parser.add_argument("--profile", choices=["quick", "common", "top100", "full"], default="common")
     parser.add_argument("--discover", "-d", action="store_true", help="Run host discovery only")
     parser.add_argument("--services", "-s", action="store_true", help="Enable service detection")
+    parser.add_argument("--udp", "-u", action="store_true", help="Enable UDP scanning")
     parser.add_argument("--web", "-w", action="store_true", help="Start web dashboard")
     parser.add_argument("--port", type=int, default=5000, help="Web dashboard port")
     parser.add_argument("--timeout", type=float, default=1.0, help="Scan timeout in seconds")
@@ -391,7 +408,8 @@ def main():
     # Single target scan
     if len(targets) == 1:
         scanner = PortScanner(timeout=args.timeout)
-        results = scanner.scan_host(targets[0], profile=args.profile)
+        scan_type = "udp" if args.udp else "tcp"
+        results = scanner.scan_host(targets[0], profile=args.profile, scan_type=scan_type)
 
         if args.services and results["open_ports"]:
             detector = ServiceDetector()
@@ -406,10 +424,11 @@ def main():
         # Multi-target: discover first, then scan each
         discoverer = HostDiscovery(timeout=args.timeout)
         hosts = discoverer.scan_network(targets, method="tcp")
-        
+
         scanner = PortScanner(timeout=args.timeout)
+        scan_type = "udp" if args.udp else "tcp"
         for host in hosts:
-            scanner.scan_host(host["ip"], profile=args.profile)
+            scanner.scan_host(host["ip"], profile=args.profile, scan_type=scan_type)
 
 
 if __name__ == "__main__":

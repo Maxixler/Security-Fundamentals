@@ -1,0 +1,125 @@
+"""
+Credential Manager — Secure Storage for Service Credentials
+============================================================
+
+Manages secure storage and retrieval of credentials for authenticated
+vulnerability scanning. For educational simulation, credentials are stored
+in memory.
+"""
+
+import logging
+from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class Credential:
+    """Represents a set of credentials for a service."""
+    username: str
+    password: str
+    service_type: str
+    description: Optional[str] = None
+
+class CredentialManager:
+    """
+    Manages credentials for authenticated scanning operations.
+
+    Provides methods to add, retrieve, and validate credentials for
+    various service types (SSH, FTP, HTTP, etc.).
+    """
+
+    def __init__(self) -> None:
+        self._credentials: Dict[str, List[Credential]] = {}
+        logger.debug("CredentialManager initialized")
+
+    def add_credential(self, credential: Credential) -> None:
+        """
+        Add a credential to the manager.
+
+        Args:
+            credential: Credential object to store
+        """
+        if credential.service_type not in self._credentials:
+            self._credentials[credential.service_type] = []
+        self._credentials[credential.service_type].append(credential)
+        logger.debug(f"Added credential for {credential.service_type}: {credential.username}")
+
+    def get_credentials(self, service_type: str) -> List[Credential]:
+        """
+        Retrieve all credentials for a given service type.
+
+        Args:
+            service_type: Service protocol name (SSH, FTP, HTTP, etc.)
+
+        Returns:
+            List of Credential objects for the service type
+        """
+        return self._credentials.get(service_type, [])
+
+    def has_credentials(self, service_type: str) -> bool:
+        """
+        Check if credentials exist for a service type.
+
+        Args:
+            service_type: Service protocol name
+
+        Returns:
+            True if credentials exist, False otherwise
+        """
+        return service_type in self._credentials and len(self._credentials[service_type]) > 0
+
+    def clear_credentials(self, service_type: Optional[str] = None) -> None:
+        """
+        Clear credentials for a service type or all service types.
+
+        Args:
+            service_type: Specific service type to clear, or None to clear all
+        """
+        if service_type:
+            if service_type in self._credentials:
+                del self._credentials[service_type]
+                logger.debug(f"Cleared credentials for {service_type}")
+        else:
+            self._credentials.clear()
+            logger.debug("Cleared all credentials")
+
+# Global credential manager instance
+credential_manager = CredentialManager()
+
+# Add some default credentials for testing/demo purposes
+def _load_default_credentials():
+    """Load common default credentials for testing."""
+    default_creds = [
+        # SSH credentials
+        Credential("root", "root", "SSH"),
+        Credential("admin", "admin", "SSH"),
+        Credential("admin", "password", "SSH"),
+        Credential("pi", "raspberry", "SSH"),
+
+        # FTP credentials
+        Credential("anonymous", "", "FTP"),
+        Credential("ftp", "ftp", "FTP"),
+        Credential("admin", "admin", "FTP"),
+
+        # HTTP/Web credentials
+        Credential("admin", "admin", "HTTP"),
+        Credential("admin", "password", "HTTP"),
+        Credential("administrator", "admin", "HTTP"),
+
+        # MySQL credentials
+        Credential("root", "", "MySQL"),
+        Credential("root", "root", "MySQL"),
+        Credential("mysql", "mysql", "MySQL"),
+
+        # PostgreSQL credentials
+        Credential("postgres", "", "PostgreSQL"),
+        Credential("postgres", "postgres", "PostgreSQL"),
+        Credential("admin", "admin", "PostgreSQL"),
+    ]
+
+    for cred in default_creds:
+        credential_manager.add_credential(cred)
+
+# Load default credentials on module import
+_load_default_credentials()

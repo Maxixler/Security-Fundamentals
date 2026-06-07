@@ -1,0 +1,88 @@
+{
+  "report_metadata": {
+    "tool": "Network Scanner v1.0",
+    "generated_at": "2026-06-07T14:38:15.291627",
+    "report_type": "Network Scan Report"
+  },
+  "scan_results": {
+    "target": "127.0.0.1",
+    "scan_time": "2026-06-07T14:38:09.267875",
+    "duration_seconds": 1.01,
+    "ports_scanned": 36,
+    "open_ports": [
+      {
+        "port": 135,
+        "state": "open",
+        "service": "MS-RPC",
+        "description": "Microsoft RPC (often targeted)",
+        "rtt_ms": 0.0,
+        "is_ot_port": false,
+        "ot_protocol": ""
+      },
+      {
+        "port": 445,
+        "state": "open",
+        "service": "SMB",
+        "description": "Server Message Block / CIFS",
+        "rtt_ms": 0.0,
+        "is_ot_port": false,
+        "ot_protocol": ""
+      },
+      {
+        "port": 3389,
+        "state": "open",
+        "service": "RDP",
+        "description": "Remote Desktop Protocol",
+        "rtt_ms": 0.0,
+        "is_ot_port": false,
+        "ot_protocol": ""
+      }
+    ],
+    "open_count": 3,
+    "closed_count": 0,
+    "filtered_count": 33,
+    "profile": "common",
+    "scan_type": "tcp",
+    "services": [
+      {
+        "ip": "127.0.0.1",
+        "port": 135,
+        "protocol": "unknown",
+        "banner": "",
+        "service": "",
+        "version": "",
+        "os_hint": "",
+        "ssl": false,
+        "ssl_info": {},
+        "security_notes": [],
+        "timestamp": "2026-06-07T14:38:10.278293"
+      },
+      {
+        "ip": "127.0.0.1",
+        "port": 445,
+        "protocol": "unknown",
+        "banner": "",
+        "service": "",
+        "version": "",
+        "os_hint": "",
+        "ssl": false,
+        "ssl_info": {},
+        "security_notes": [],
+        "timestamp": "2026-06-07T14:38:10.278293"
+      },
+      {
+        "ip": "127.0.0.1",
+        "port": 3389,
+        "protocol": "unknown",
+        "banner": "",
+        "service": "",
+        "version": "",
+        "os_hint": "",
+        "ssl": false,
+        "ssl_info": {},
+        "security_notes": [],
+        "timestamp": "2026-06-07T14:38:10.279292"
+      }
+    ]
+  }
+}

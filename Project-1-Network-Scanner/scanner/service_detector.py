@@ -13,11 +13,18 @@ What is Banner Grabbing?
   2. Look up known vulnerabilities (CVEs) for that version
   3. Verify if the service is authorized/expected
 
+What is OS Fingerprinting?
+- Different operating systems have characteristic network behaviors
+- TTL (Time To Live) values in packets vary by OS
+- TCP window sizes also differ between operating systems
+- By analyzing these characteristics, we can guess the remote OS
+
 Security Implications:
 - Detailed banners help attackers identify vulnerable versions
 - Best practice: Minimize banner information (banner hardening)
 - In enterprise environments, knowing exact service versions helps the security
   team prioritize patching and identify unauthorized services
+- OS fingerprinting helps identify potential attack vectors specific to certain OSes
 """
 
 import socket
@@ -75,23 +82,53 @@ class ServiceDetector:
         self.timeout = timeout
         self.max_threads = max_threads
 
-    def grab_banner(self, ip: str, port: int) -> dict:
+        # OS fingerprinting signatures based on TTL and window size
+        self.OS_FINGERPRINTS = {
+            "Linux": {"ttl": 64, "window": [5840, 29200, 65535]},
+            "Windows": {"ttl": 128, "window": [65535, 8192, 16384, 17520, 32768]},
+            "FreeBSD": {"ttl": 64, "window": [65535, 16384, 32768, 65535]},
+            "OpenBSD": {"ttl": 64, "window": [65535, 16384, 32760, 65535]},
+            "NetBSD": {"ttl": 64, "window": [65535, 16384, 32768, 65535]},
+            "Cisco Router": {"ttl": 255, "window": [4128, 8192, 16384, 32768, 65535]},
+            "Printer": {"ttl": 255, "window": [65535]},
+        }
+
+    def grab_banner(self, ip: str, port: int, service_info: dict = None) -> dict:
         """
         Attempt to grab the service banner from an open port.
-        
+
         Process:
         1. Connect to the target port
         2. Some services send a banner immediately (SSH, FTP, SMTP)
         3. For others, send a protocol-specific probe (HTTP GET, etc.)
         4. Read and parse the response
         5. Extract software name, version, and other details
+
+        Args:
+            ip: Target IP address
+            port: Target port number
+            service_info: Optional service information from port scanner
         """
+        # Use service info from port scanner if available, otherwise use defaults
+        if service_info:
+            # The service_info from port scanner contains 'service' and 'description' fields
+            protocol = service_info.get("service", "").lower()
+            # Fallback to port-based detection if service is empty or unrecognized
+            if not protocol or protocol == "unknown":
+                protocol = self.PORT_PROTOCOL.get(port, "unknown")
+            service = service_info.get("service", "")
+            description = service_info.get("description", "")
+        else:
+            protocol = self.PORT_PROTOCOL.get(port, "unknown")
+            service = ""
+            description = ""
+
         result = {
             "ip": ip,
             "port": port,
-            "protocol": self.PORT_PROTOCOL.get(port, "unknown"),
+            "protocol": protocol,
             "banner": "",
-            "service": "",
+            "service": service,
             "version": "",
             "os_hint": "",
             "ssl": False,
@@ -99,6 +136,9 @@ class ServiceDetector:
             "security_notes": [],
             "timestamp": datetime.now().isoformat(),
         }
+
+        # Store description for potential use in OS fingerprinting
+        result["_description"] = description
 
         # Try SSL first for known HTTPS ports
         if port in (443, 8443, 465, 993, 995, 636):
@@ -115,7 +155,14 @@ class ServiceDetector:
             sock.connect((ip, port))
 
             # Some services send banner immediately
-            protocol = self.PORT_PROTOCOL.get(port, "generic")
+            # Determine protocol - use service_info if available, otherwise fallback to PORT_PROTOCOL
+            if service_info:
+                protocol = service_info.get("service", "").lower()
+                if not protocol:  # If service is empty, fallback to port-based detection
+                    protocol = self.PORT_PROTOCOL.get(port, "generic")
+            else:
+                protocol = self.PORT_PROTOCOL.get(port, "generic")
+
             probe = self.PROBES.get(protocol, self.PROBES["generic"])
 
             if protocol == "http":
@@ -220,6 +267,13 @@ class ServiceDetector:
         except Exception as e:
             result["banner"] = f"SSL Error: {str(e)}"
 
+        # Perform OS fingerprinting based on TTL and window size (if available)
+        # Note: In a real implementation, we'd need to capture TTL from packets
+        # For this simulation, we'll use heuristic-based hints from banners
+        os_hint = self._os_fingerprint_heuristic(result)
+        if os_hint:
+            result["os_hint"] = os_hint
+
         return result
 
     def _parse_banner(self, banner: str, port: int, protocol: str) -> dict:
@@ -291,14 +345,159 @@ class ServiceDetector:
 
         return result
 
+    def _os_fingerprint_heuristic(self, result: dict) -> str:
+        """
+        Perform OS fingerprinting using heuristic analysis of banner and service information.
+
+        This method analyzes service banners, service names, descriptions, and other characteristics
+        to make educated guesses about the underlying operating system.
+
+        Args:
+            result: Service detection result dictionary
+
+        Returns:
+            String hint about the detected OS, or empty string if undetermined
+        """
+        banner = result.get("banner", "").lower()
+        service = result.get("service", "").lower()
+        description = result.get("_description", "").lower()
+        version = result.get("version", "").lower()
+        port = result.get("port", 0)
+
+        # Debug print to see what we're working with
+        # print(f"DEBUG OS Fingerprinting: port={port}, service='{service}', description='{description}', banner='{banner[:50]}...'")
+
+        # Service-specific OS detection (check these first)
+        if "apache" in service:
+            if "ubuntu" in banner or "debian" in banner:
+                return "Linux (Ubuntu/Debian) with Apache"
+            elif "centos" in banner or "red hat" in banner:
+                return "Linux (RHEL/CentOS) with Apache"
+            elif "windows" in banner:
+                return "Windows with Apache"
+            else:
+                return "Linux/Unix with Apache"
+        elif "nginx" in service:
+            if "ubuntu" in banner or "debian" in banner:
+                return "Linux (Ubuntu/Debian) with nginx"
+            elif "centos" in banner:
+                return "Linux (CentOS) with nginx"
+            elif "windows" in banner:
+                return "Windows with nginx"
+            else:
+                return "Linux/Unix with nginx"
+        elif "mysql" in service:
+            if "ubuntu" in banner or "debian" in banner:
+                return "Linux (Ubuntu/Debian) with MySQL"
+            elif "centos" in banner or "red hat" in banner:
+                return "Linux (RHEL/CentOS) with MySQL"
+            elif "windows" in banner:
+                return "Windows with MySQL"
+            else:
+                return "Linux/Unix with MySQL"
+        elif "ssh" in service:
+            if "openbsd" in banner:
+                return "OpenBSD with OpenSSH"
+            elif "freebsd" in banner:
+                return "FreeBSD with OpenSSH"
+            elif "ubuntu" in banner:
+                return "Linux (Ubuntu) with OpenSSH"
+            elif "debian" in banner:
+                return "Linux (Debian) with OpenSSH"
+            else:
+                return "Unix-like with SSH"
+        elif "iis" in service or "http" in service:
+            # IIS detection
+            if "windows" in banner or "iis" in banner:
+                return "Windows with IIS"
+            elif "10.0" in version:
+                return "Windows Server 2016/Windows 10 with IIS"
+            else:
+                return "Windows with IIS"
+
+        # Heuristic-based OS detection from banners/descriptions
+        combined_text = f"{banner} {description}"
+
+        if "windows" in combined_text or "microsoft" in combined_text or "iis" in service:
+            # Check for specific Windows versions
+            if "2000" in version or "5.0" in version:
+                return "Windows 2000"
+            elif "2003" in version or "5.2" in version:
+                return "Windows Server 2003"
+            elif "vista" in version or "6.0" in version:
+                return "Windows Vista"
+            elif "2008" in version or "6.1" in version:
+                return "Windows Server 2008"
+            elif "7" in version or "6.1" in version:
+                return "Windows 7"
+            elif "2012" in version or "6.2" in version:
+                return "Windows Server 2012"
+            elif "8" in version or "6.3" in version:
+                return "Windows 8"
+            elif "2016" in version or "10.0" in version:
+                return "Windows Server 2016/Windows 10"
+            elif "2019" in version or "10.0" in version:
+                return "Windows Server 2019"
+            elif "2022" in version:
+                return "Windows Server 2022"
+            else:
+                return "Windows"
+
+        elif "linux" in combined_text or "ubuntu" in combined_text or "debian" in combined_text or "centos" in combined_text:
+            if "ubuntu" in combined_text:
+                return "Linux (Ubuntu)"
+            elif "debian" in combined_text:
+                return "Linux (Debian)"
+            elif "centos" in combined_text:
+                return "Linux (CentOS)"
+            else:
+                return "Linux"
+
+        elif "freebsd" in combined_text:
+            return "FreeBSD"
+        elif "openbsd" in combined_text:
+            return "OpenBSD"
+        elif "netbsd" in combined_text:
+            return "NetBSD"
+        elif "cisco" in combined_text or "ios" in combined_text:
+            return "Cisco IOS"
+
+        # Port-based and service-based OS fingerprinting for common Windows services
+        # These are strong indicators of Windows when specific port/service combinations are found
+        if port in [135, 139, 445, 3389, 5985, 5986, 9389, 47001] or \
+           service in ["ms-rpc", "smb", "rdp", "netbios-ss"] or \
+           "microsoft" in combined_text or "microsoft" in description:
+            # These are very characteristic Windows ports/services
+            if port == 445 or "smb" in service or "smb" in description:
+                return "Windows (SMB service)"
+            elif port == 3389 or "rdp" in service or "rdp" in description:
+                return "Windows (RDP service)"
+            elif port == 135 or "ms-rpc" in service or "ms-rpc" in description:
+                return "Windows (MS-RPC service)"
+            elif port in [139] or "netbios" in service or "netbios" in description:
+                return "Windows (NetBIOS service)"
+            else:
+                return "Windows"
+
+        # If we have Windows-typical services but no banner/description, still suggest Windows
+        if service in ["ms-rpc", "smb", "rdp"] or "microsoft" in service:
+            return "Windows"
+
+        # If we have Linux/Unix typical services but no specific banner/description info
+        if service in ["ssh", "http"] and not banner and not description:
+            # Could be either, but Linux is more common for these in default configs
+            return "Linux/Unix (likely)"
+
+        return ""
+
     def detect_services(self, ip: str, open_ports: list) -> list:
         """
         Detect services on all open ports of a host.
-        
+
         Args:
             ip: Target IP address
             open_ports: List of open port dictionaries from port scanner
-            
+
         Returns:
             list: List of service detection results
         """
@@ -309,8 +508,8 @@ class ServiceDetector:
 
         with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
             futures = {
-                executor.submit(self.grab_banner, ip, port): port
-                for port in port_numbers
+                executor.submit(self.grab_banner, ip, port, port_info): port
+                for port, port_info in zip(port_numbers, open_ports)
             }
 
             for future in as_completed(futures):
